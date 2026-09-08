@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>태양광 대시보드 배치 목업 — 전체 인터랙션</title>
+  <style>
+    :root {
+      --bg: #0b0b0b; --card: #1c1c1c; --card2: #232323; --line: #333;
+      --text: #f3f3f3; --dim: #9a9a9a; --muted: #6a6a6a;
+      --green: #2ecc71; --teal: #1abc9c; --orange: #e67e22; --yellow: #f1c40f;
+      --blue: #3498db; --accent: #0e6e7a;
+      --gap: 14px; --radius: 12px; --content: 1680px;
+      --font: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+    button, select { font-family: inherit; }
+    button { cursor: pointer; }
+    .page { max-width: var(--content); margin: 0 auto; padding: 24px 24px 100px; }
+    .spec-banner {
+      background: linear-gradient(135deg, #1a1830, #121212); border: 1px solid #3a3560;
+      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px;
+    }
+    .spec-banner h1 { margin: 0 0 6px; font-size: 18px; }
+    .spec-banner p { margin: 0; color: var(--dim); font-size: 13px; line-height: 1.55; }
+    .page-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+    .page-title h2 { margin: 0; font-size: 24px; }
+    .crumb { color: var(--dim); font-size: 12px; }
+    .section { margin-bottom: 28px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .section-head h3 { margin: 0; font-size: 14px; color: #ccc; }
+    .section-head .hint { font-size: 12px; color: var(--muted); }
+    .pill { font-size: 10px; padding: 2px 7px; border-radius: 4px; margin-left: 6px; }
+    .pill-e { background: #1e3a2f; color: #7dcea0; }
+    .pill-p { background: #2a2540; color: #b8a9ff; }
+    .row { display: flex; gap: var(--gap); width: 100%; }
+    .widget { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; min-width: 0; }
+    .w-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 0; }
+    .w-title { font-size: 15px; font-weight: 700; }
+    .w-sub { font-size: 12px; color: var(--dim); }
+    .size-tag {
+      position: absolute; top: 10px; right: 10px; z-index: 4; background: rgba(0,0,0,.75);
+      border: 1px solid #666; color: #ffe08a; font-size: 11px; padding: 5px 8px; border-radius: 6px; pointer-events: none;
+    }
+    .size-tag .id { color: #8ad4ff; font-weight: 700; }
+
+    .site-ops { padding: 16px 10px 18px; min-height: 168px; }
+    .ops-grid { display: grid; grid-template-columns: repeat(6, 1fr); }
+    .ops-col { padding: 6px 16px; border-right: 1px solid var(--line); }
+    .ops-col:last-child { border-right: 0; }
+    .ops-label { font-size: 13px; color: var(--dim); margin-bottom: 10px; }
+    .ops-value { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+    .ops-sub { font-size: 12px; color: var(--dim); margin-top: 5px; display: flex; gap: 6px; align-items: center; }
+    .badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(46,204,113,.18); color: var(--green); }
+
+    .sensor-body { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 14px 16px 18px; }
+    .sensor-card { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; }
+    .sensor-icon { width: 48px; height: 48px; border-radius: 10px; background: #2a2a2a; display: grid; place-items: center; font-size: 22px; }
+    .sensor-label { font-size: 13px; color: var(--dim); }
+    .sensor-value { font-size: 24px; font-weight: 700; }
+    .weather { background: linear-gradient(180deg, #1a2a22, #151f1a); min-height: 248px; padding: 14px 16px 18px; display: flex; flex-direction: column; align-items: center; }
+    .weather .w-title { align-self: flex-start; margin-bottom: 18px; }
+    .weather-icon { width: 72px; height: 72px; border-radius: 14px; background: #234033; display: grid; place-items: center; font-size: 36px; margin-bottom: 12px; }
+    .weather-temp { font-size: 40px; font-weight: 800; }
+    .weather-temp span { font-size: 18px; vertical-align: super; }
+    .weather-meta { display: flex; gap: 20px; margin-top: 18px; font-size: 13px; color: var(--dim); }
+    .weather-meta b { color: var(--text); }
+    .co2 { min-height: 248px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: center; gap: 14px; background: linear-gradient(160deg, #1a2230, #151515); }
+    .co2-line { font-size: 15px; text-align: center; line-height: 1.55; color: #d5d5d5; }
+    .co2-line em { font-style: normal; color: var(--green); font-weight: 700; }
+    .co2-tree { width: 64px; height: 64px; margin: 0 auto; border-radius: 50%; background: #1e3a2a; display: grid; place-items: center; font-size: 30px; }
+
+    .status-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px 16px 18px; }
+    .metric-card { background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 18px; min-height: 280px; border-top: 4px solid var(--green); display: flex; flex-direction: column; gap: 8px; transition: transform .15s; cursor: pointer; }
+    .metric-card:hover { transform: translateY(-2px); }
+    .metric-card.tpr { border-top-color: var(--teal); }
+    .mc-top { display: flex; justify-content: space-between; align-items: center; }
+    .mc-label { font-size: 14px; font-weight: 700; }
+    .st { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
+    .st-ok { background: rgba(46,204,113,.2); color: var(--green); }
+    .st-low { background: rgba(241,196,15,.18); color: var(--yellow); }
+    .st-warn { background: rgba(230,126,34,.2); color: var(--orange); }
+    .st-check { background: rgba(52,152,219,.2); color: var(--blue); }
+    .st-none { background: rgba(100,100,100,.25); color: #aaa; }
+    .mc-val { font-size: 56px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin: 8px 0 4px; }
+    .mc-val.pr { color: #7dffa8; }
+    .mc-val.tpr { color: #6ef0d8; }
+    .mc-msg { font-size: 14px; color: #ddd; }
+    .mc-link { font-size: 13px; color: var(--green); margin-top: 4px; }
+    .metric-card.tpr .mc-link { color: var(--teal); }
+    .mc-guide { font-size: 12px; color: var(--muted); margin-top: auto; line-height: 1.45; }
+
+    .inv-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 14px 16px 18px; }
+    .inv-card { background: var(--card2); border: 1px solid var(--line); border-radius: 12px; min-height: 150px; padding: 14px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform .15s; }
+    .inv-card:hover { transform: translateY(-2px); border-color: #666; }
+    .inv-card .top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+    .inv-card .name { font-size: 13px; font-weight: 700; }
+    .inv-card .pct { font-size: 34px; font-weight: 800; margin: 14px 0 6px; }
+    .inv-card .foot { font-size: 12px; color: var(--dim); margin-top: auto; }
+
+    .toolbar { display: flex; gap: 8px; align-items: center; padding: 10px 16px 0; flex-wrap: wrap; }
+    .tab { border: 0; background: #2a2a2a; color: var(--dim); border-radius: 999px; padding: 7px 14px; font-size: 13px; }
+    .tab.on { background: var(--accent); color: #fff; }
+    .date-nav { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--dim); font-size: 13px; }
+    .date-nav button { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: #222; color: #ddd; }
+    .date-box { background: #222; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; color: #eee; min-width: 160px; text-align: center; }
+    .hint-inline { font-size: 12px; color: var(--muted); margin-left: 8px; }
+
+    .trend-shell { display: grid; grid-template-columns: 1fr 340px; min-height: 560px; }
+    .trend-main { padding: 8px 12px 16px; border-right: 1px solid var(--line); min-width: 0; }
+    .trend-side { padding: 16px; background: #171717; display: flex; flex-direction: column; gap: 12px; }
+    .trend-side h4 { margin: 0; font-size: 14px; }
+    .idle { flex: 1; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.6; padding: 20px; border: 1px dashed #3a3a3a; border-radius: 10px; }
+    .chart-wrap { position: relative; width: 100%; height: 380px; margin-top: 8px; }
+    .chart-wrap svg { width: 100%; height: 100%; display: block; }
+    .status-band { display: grid; gap: 2px; height: 18px; margin: 8px 48px 0 52px; }
+    .status-band.hidden { display: none; }
+    .status-band span { border-radius: 3px; height: 100%; }
+    .legend-row { display: flex; flex-wrap: wrap; gap: 14px; padding: 12px 52px 4px; font-size: 12px; color: var(--dim); }
+    .legend-row i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+    .legend-row .sq { width: 10px; height: 10px; }
+
+    .tooltip {
+      position: fixed; z-index: 50; pointer-events: none; background: rgba(10,10,14,.95);
+      border: 1px solid #5dade2; border-radius: 8px; padding: 10px 12px; font-size: 12px;
+      line-height: 1.5; min-width: 170px; box-shadow: 0 8px 24px rgba(0,0,0,.45); display: none; color: #eee;
+    }
+    .tooltip .t { font-weight: 700; margin-bottom: 4px; }
+    .tooltip .r { display: flex; justify-content: space-between; gap: 16px; }
+
+    .detail-status { border: 1px solid var(--orange); background: rgba(230,126,34,.08); border-radius: 10px; padding: 12px 14px; font-size: 14px; font-weight: 700; }
+    .dcard { background: #1f1f1f; border: 1px solid var(--line); border-radius: 10px; padding: 12px; border-left: 4px solid var(--green); }
+    .dcard.tpr { border-left-color: var(--teal); }
+    .dcard .lab { font-size: 12px; color: var(--dim); display: flex; justify-content: space-between; }
+    .dcard .val { font-size: 28px; font-weight: 800; margin: 6px 0; }
+    .dcard .msg { font-size: 12px; color: #ccc; }
+
+    .chart-panel { padding: 12px 14px 16px; }
+    .chart-panel .chart-wrap { height: 300px; }
+    .chart-legend { display: flex; gap: 14px; justify-content: flex-end; font-size: 12px; color: var(--dim); margin-top: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+    .acc-wrap { padding: 12px 14px 16px; }
+    .acc-item { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; background: #191919; overflow: hidden; }
+    .acc-sum { display: grid; grid-template-columns: 28px 1fr auto auto; gap: 10px; align-items: center; padding: 14px 16px; cursor: pointer; }
+    .acc-sum:hover { background: #1f1f1f; }
+    .acc-name { font-size: 14px; font-weight: 700; }
+    .acc-kw { font-size: 15px; font-weight: 700; }
+    .acc-hint { padding: 0 16px 12px 54px; font-size: 12px; color: var(--dim); }
+    .acc-body { display: none; border-top: 1px solid var(--line); padding: 8px 12px 12px; background: #151515; }
+    .acc-item.open .acc-body { display: block; }
+    .chev::before { content: "▶"; color: var(--dim); font-size: 12px; }
+    .acc-item.open .chev::before { content: "▼"; }
+    .ch-row { display: grid; grid-template-columns: 70px 1fr 1fr 1fr auto; gap: 8px; align-items: center; padding: 10px 8px; border-bottom: 1px solid #222; font-size: 13px; }
+    .ch-row.head { color: var(--dim); font-weight: 600; font-size: 12px; }
+    .ch-row.flash { outline: 2px solid #5dade2; background: rgba(93,173,226,.08); }
+
+    .hm41-shell { display: grid; grid-template-columns: 1fr 280px; min-height: 420px; }
+    .hm41-main { padding: 12px 16px 16px; border-right: 1px solid var(--line); min-width: 0; }
+    .hm41-side { padding: 16px; background: #171717; }
+    .hm-grid { display: grid; gap: 3px; margin-bottom: 10px; }
+    .hm-lab { font-size: 12px; color: var(--dim); display: flex; align-items: center; }
+    .hm-cell { height: 26px; border-radius: 3px; background: var(--green); cursor: pointer; }
+    .hm-cell:hover { outline: 2px solid #fff; outline-offset: 1px; }
+    .hm-cell.low { background: var(--yellow); }
+    .hm-cell.warn { background: var(--orange); }
+    .hm-cell.none { background: #3a3a3a; }
+    .hm-row-click { cursor: pointer; }
+    .select-inv {
+      background: #222; color: #eee; border: 1px solid var(--line); border-radius: 8px;
+      padding: 6px 10px; font-size: 13px;
+    }
+    .inv-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .inv-chip {
+      border: 1px solid var(--line); background: #222; color: var(--dim);
+      border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600;
+    }
+    .inv-chip.on { color: #fff; border-color: transparent; }
+    .inv-chip.on[data-inv="1"] { background: #f39c12; }
+    .inv-chip.on[data-inv="2"] { background: #56aaeb; }
+    .inv-chip.on[data-inv="3"] { background: #9b59b6; }
+    .inv-chip.on[data-inv="4"] { background: #2ecc71; }
+    .inv-chip.on[data-inv="5"] { background: #e74c3c; }
+    .inv-chip.on[data-inv="6"] { background: #c9a227; }
+    .inv-chip.scope.on { background: var(--accent); }
+    .gen-inv-bar {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      padding: 8px 0 4px;
+    }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .cal-head { text-align: center; font-size: 12px; color: var(--dim); padding: 4px; }
+    .cal-cell {
+      min-height: 72px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+      padding: 6px; cursor: pointer; display: flex; flex-direction: column; gap: 8px;
+    }
+    .cal-cell:hover { border-color: #666; }
+    .cal-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+    .cal-cell.sel { outline: 2px solid #5dade2; }
+    .cal-day { font-size: 12px; color: #bbb; }
+    .cal-st { align-self: center; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 5px; }
+    .count-bars { display: flex; align-items: flex-end; gap: 14px; height: 180px; margin-top: 16px; justify-content: center; }
+    .count-col { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 48px; }
+    .count-col .bar { width: 36px; border-radius: 4px 4px 0 0; min-height: 4px; }
+    .count-col .n { font-size: 12px; font-weight: 700; }
+    .count-col .l { font-size: 11px; color: var(--dim); }
+
+    .modal-back { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px; }
+    .modal-back.show { display: flex; }
+    .modal { width: min(720px, 100%); background: #1a1a1a; border: 1px solid #444; border-radius: 14px; padding: 20px 22px; max-height: 90vh; overflow: auto; }
+    .modal h3 { margin: 0 0 8px; font-size: 18px; }
+    .modal .close { float: right; border: 0; background: #333; color: #fff; width: 32px; height: 32px; border-radius: 8px; }
+    .modal table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+    .modal th, .modal td { border-bottom: 1px solid #333; padding: 8px 6px; text-align: left; }
+    .modal th { color: var(--dim); }
+    .footer-note { margin-top: 24px; padding: 14px 16px; border: 1px dashed #444; border-radius: 8px; color: var(--dim); font-size: 12px; line-height: 1.6; }
+    @media (max-width: 1200px) {
+      .trend-shell, .hm41-shell { grid-template-columns: 1fr; }
+      .trend-main, .hm41-main { border-right: 0; border-bottom: 1px solid var(--line); }
+      .row { flex-direction: column; }
+      .ops-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="spec-banner">
+      <h1>태양광 대시보드 배치 목업 — 문서 기능 전체 구현</h1>
+      <p>
+        PNG 없음 · 더미 데이터. 0037/0039 <strong>일·월·연</strong> 전환·날짜이동·호버·클릭상세·월/연→일 드릴다운.
+        0041 <strong>일/월만</strong>·인버터요약↔채널상세·필터유지·월캘린더·건수막대. 보류(0042~44)·장애·국소선택바 제외.
+      </p>
+    </div>
+
+    <div class="page-title">
+      <h2>대시보드</h2>
+      <div class="crumb">홈 &gt; 대시보드 · 인터랙션 목업</div>
+    </div>
+
+    <!-- 1 -->
+    <section class="section">
+      <div class="section-head"><h3>1. 운영 요약 <span class="pill pill-e">기존</span></h3><span class="hint">이용률 제외</span></div>
+      <div class="widget site-ops">
+        <div class="size-tag"><span class="id">SITE-OPS</span> · W 100% · H ≈ 168</div>
+        <div class="w-title" style="padding:0 8px 12px">국소운영현황</div>
+        <div class="ops-grid">
+          <div class="ops-col"><div class="ops-label">운전상태</div><div class="ops-value">운전중</div><div class="ops-sub">인버터 1~6 <span class="badge">정상</span></div><div class="ops-sub">전력량계 1호기 <span class="badge">정상</span></div></div>
+          <div class="ops-col"><div class="ops-label">현재 발전 전력</div><div class="ops-value">248.6 kW</div><div class="ops-sub">인버터 합계: 248.6 kW</div><div class="ops-sub">전력량계: 246.1 kW</div></div>
+          <div class="ops-col"><div class="ops-label">현재 발전량</div><div class="ops-value">1.82 kWh</div><div class="ops-sub">15분 구간</div><div class="ops-sub">전력량계: 1.80 kWh</div></div>
+          <div class="ops-col"><div class="ops-label">오늘 발전량</div><div class="ops-value">1,246 kWh</div><div class="ops-sub">인버터 합계</div><div class="ops-sub">전력량계: 1,238 kWh</div></div>
+          <div class="ops-col"><div class="ops-label">어제 발전량</div><div class="ops-value">1,512 kWh</div><div class="ops-sub">인버터 합계</div><div class="ops-sub">전력량계: 1,498 kWh</div></div>
+          <div class="ops-col"><div class="ops-label">이번달 누적발전량</div><div class="ops-value">28.4 MWh</div><div class="ops-sub">인버터 합계</div><div class="ops-sub">전력량계: 28.1 MWh</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="section">
+      <div class="section-head"><h3>2. 환경 · 탄소 <span class="pill pill-e">기존</span></h3><span class="hint">Sensor · 기상 · CO₂</span></div>
+      <div class="row">
+        <div class="widget" style="flex:1.6">
+          <div class="size-tag"><span class="id">SENSOR</span> · ≈55% · H 248</div>
+          <div class="w-head"><div class="w-title">Sensor <span class="w-sub">Last data — 2026.09.08 11:00</span></div></div>
+          <div class="sensor-body">
+            <div class="sensor-card"><div class="sensor-icon">☀</div><div class="sensor-label">수평일사량</div><div class="sensor-value">612 W/m²</div></div>
+            <div class="sensor-card"><div class="sensor-icon">☀</div><div class="sensor-label">경사일사량</div><div class="sensor-value">748 W/m²</div></div>
+            <div class="sensor-card"><div class="sensor-icon">🌡</div><div class="sensor-label">외기온도</div><div class="sensor-value">28.4 ℃</div></div>
+            <div class="sensor-card"><div class="sensor-icon">▦</div><div class="sensor-label">모듈온도</div><div class="sensor-value">41.2 ℃</div></div>
+          </div>
+        </div>
+        <div class="widget weather" style="flex:0 0 240px">
+          <div class="size-tag"><span class="id">WEATHER</span> · 240×248</div>
+          <div class="w-title">기상정보</div>
+          <div class="weather-icon">⛅</div>
+          <div class="weather-temp">25.1<span>℃</span></div>
+          <div class="weather-meta"><span>습도 <b>70%</b></span><span>풍속 <b>1.4 m/s</b></span></div>
+        </div>
+        <div class="widget co2" style="flex:1;min-width:260px">
+          <div class="size-tag"><span class="id">CO2</span> · ≈28% · H 248</div>
+          <div class="w-title" style="align-self:flex-start">이산화탄소 저감량</div>
+          <div class="co2-line">올해 이산화탄소 <em>142.6 tCO2</em>를 저감하여</div>
+          <div class="co2-tree">🌲</div>
+          <div class="co2-line">소나무 <em>20,371그루</em>를 심은 효과를<br>보고 있습니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="section">
+      <div class="section-head"><h3>3. 성능 현황 <span class="pill pill-p">PPT</span></h3><span class="hint">클릭 → 설명 모달</span></div>
+      <div class="row">
+        <div class="widget" style="flex:1.05" id="wdgt0036">
+          <div class="size-tag"><span class="id">WDGT0036</span> · ≈52% · H ≈ 360</div>
+          <div class="w-head"><div class="w-title">발전·더위 현황 (PR / TPR)</div><div class="w-sub">2026.09.08 11:00 · 15분마다 갱신</div></div>
+          <div class="status-pair">
+            <div class="metric-card" data-detail="pr">
+              <div class="mc-top"><span class="mc-label">발전 성능</span><span class="st st-ok">정상</span></div>
+              <div class="mc-val pr">78.4</div>
+              <div class="mc-msg">날씨 대비 발전 성능이 정상 범위예요</div>
+              <div class="mc-link">이 값은 무엇인가요?</div>
+              <div class="mc-guide">PR = 실제발전 ÷ (일사×용량)<br>고객 안내 문구 2줄 (고정)</div>
+            </div>
+            <div class="metric-card tpr" data-detail="tpr">
+              <div class="mc-top"><span class="mc-label">더위 영향 제외 성능</span><span class="st st-ok">정상</span></div>
+              <div class="mc-val tpr">82.1</div>
+              <div class="mc-msg">더위 영향을 제외해도 성능이 좋아요</div>
+              <div class="mc-link">이 값은 무엇인가요?</div>
+              <div class="mc-guide">TPR = 온도 보정 후 성능<br>고객 안내 문구 2줄 (고정)</div>
+            </div>
+          </div>
+        </div>
+        <div class="widget" style="flex:0.95" id="wdgt0038">
+          <div class="size-tag"><span class="id">WDGT0038</span> · ≈48% · H ≈ 360</div>
+          <div class="w-head"><div class="w-title">인버터 변환효율 현황</div><div class="w-sub">DC→AC · Z169</div></div>
+          <div class="inv-board" id="invBoard"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="section">
+      <div class="section-head"><h3>4. 성능 추이 <span class="pill pill-p">PPT</span></h3><span class="hint">일/월/연 · 호버·클릭 · 월·연 클릭 시 일별 드릴다운</span></div>
+
+      <div class="widget" style="margin-bottom:var(--gap)" id="wdgt0037">
+        <div class="size-tag"><span class="id">WDGT0037</span> · W 100% · H ≈ 560</div>
+        <div class="w-head"><div class="w-title">발전·더위 추이 (PR·TPR + 일사)</div><div class="w-sub" id="prHint">15분 구간</div></div>
+        <div class="toolbar" id="prToolbar">
+          <button class="tab on" data-period="day">일별</button>
+          <button class="tab" data-period="month">월별</button>
+          <button class="tab" data-period="year">연별</button>
+          <span class="hint-inline" id="prDrillHint"></span>
+          <div class="date-nav">
+            <button type="button" data-nav="-1">‹</button>
+            <div class="date-box" id="prDateBox">2026. 09. 08 (화)</div>
+            <button type="button" data-nav="1">›</button>
+            <button type="button" class="tab" data-nav="today">오늘</button>
+          </div>
+        </div>
+        <div class="trend-shell">
+          <div class="trend-main">
+            <div class="chart-wrap" id="chartPr"></div>
+            <div class="status-band" id="bandPr"></div>
+            <div class="legend-row" id="legendPr"></div>
+          </div>
+          <aside class="trend-side" id="sidePr">
+            <h4>선택 구간 상세</h4>
+            <div class="idle">차트에 마우스를 올리면 수치가 보이고,<br>클릭하면 이곳에 상세가 고정됩니다.</div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="widget" id="wdgt0039">
+        <div class="size-tag"><span class="id">WDGT0039</span> · W 100% · H ≈ 560</div>
+        <div class="w-head"><div class="w-title">인버터 변환효율 추이</div><div class="w-sub" id="invHint">N선 + 일사 막대</div></div>
+        <div class="toolbar" id="invToolbar">
+          <button class="tab on" data-period="day">일별</button>
+          <button class="tab" data-period="month">월별</button>
+          <button class="tab" data-period="year">연별</button>
+          <span class="hint-inline" id="invDrillHint"></span>
+          <div class="date-nav">
+            <button type="button" data-nav="-1">‹</button>
+            <div class="date-box" id="invDateBox">2026. 09. 08 (화)</div>
+            <button type="button" data-nav="1">›</button>
+            <button type="button" class="tab" data-nav="today">오늘</button>
+          </div>
+        </div>
+        <div class="trend-shell">
+          <div class="trend-main">
+            <div class="chart-wrap" id="chartInv"></div>
+            <div class="legend-row" id="legendInv"></div>
+          </div>
+          <aside class="trend-side" id="sideInv">
+            <h4>선택 구간 상세</h4>
+            <div class="idle">호버로 수치 확인 · 클릭으로 상세 고정<br>월·연에서 점 클릭 시 해당 일별로 이동합니다.</div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="section">
+      <div class="section-head"><h3>5. 발전량 Trend <span class="pill pill-e">기존</span></h3><span class="hint">상단 2개=인버터별 · 하단 2개=전력량계 통합</span></div>
+      <div class="row" style="margin-bottom:var(--gap)">
+        <div class="widget chart-panel" style="flex:1">
+          <div class="size-tag"><span class="id">GEN-15M</span> · 50% · H ≈ 400</div>
+          <div class="w-title">인버터 별 15분 발전량 Trend</div>
+          <div class="gen-inv-bar" id="gen15Chips"></div>
+          <div class="chart-wrap" id="chartGen15"></div>
+        </div>
+        <div class="widget chart-panel" style="flex:1">
+          <div class="size-tag"><span class="id">GEN-CUM</span> · 50% · H ≈ 400</div>
+          <div class="w-title">인버터 누적발전량 Trend</div>
+          <div class="gen-inv-bar" id="genCumChips"></div>
+          <div class="chart-wrap" id="chartGenCum"></div>
+        </div>
+      </div>
+      <div class="widget chart-panel" style="margin-bottom:var(--gap)">
+        <div class="size-tag"><span class="id">GEN-MONTH</span> · 100% · H ≈ 360</div>
+        <div class="w-title">이번달 발전량 Trend</div>
+        <div class="chart-legend" style="margin-top:6px">
+          <span><i class="dot" style="background:#2ecc71"></i>이번달 누적 (전력량계 통합)</span>
+          <span><i class="dot" style="background:#9b59b6"></i>지난달 누적 (전력량계 통합)</span>
+        </div>
+        <div class="chart-wrap" id="chartGenMonth"></div>
+      </div>
+      <div class="widget chart-panel">
+        <div class="size-tag"><span class="id">GEN-YEAR</span> · 100% · H ≈ 360</div>
+        <div class="w-title">해당년 발전량 Trend</div>
+        <div class="chart-legend" style="margin-top:6px">
+          <span><i class="dot" style="background:#2ecc71"></i>올해 누적 (전력량계 통합)</span>
+          <span><i class="dot" style="background:#888"></i>작년 누적 (전력량계 통합)</span>
+        </div>
+        <div class="chart-wrap" id="chartGenYear"></div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="section">
+      <div class="section-head"><h3>6. PV 채널 현황 · 상태 이력 <span class="pill pill-p">PPT</span></h3><span class="hint">0040 아코디언 · 0041 일/월·필터·드릴다운</span></div>
+
+      <div class="widget" style="margin-bottom:var(--gap)" id="wdgt0040">
+        <div class="size-tag"><span class="id">WDGT0040</span> · W 100%</div>
+        <div class="w-head"><div class="w-title">인버터 PV 채널 별 발전 현황</div><div class="w-sub">합계 kW로 판정하지 않음 · DEV% 기준</div></div>
+        <div class="acc-wrap" id="accRoot"></div>
+      </div>
+
+      <div class="widget" id="wdgt0041">
+        <div class="size-tag"><span class="id">WDGT0041</span> · W 100% · 연별 없음</div>
+        <div class="w-head"><div class="w-title">인버터·채널 상태 추이</div><div class="w-sub">히트맵/캘린더 + 건수 · 필터 유지</div></div>
+        <div class="toolbar" id="hmToolbar">
+          <button class="tab on" data-period="day">일별</button>
+          <button class="tab" data-period="month">월별</button>
+          <div class="date-nav">
+            <button type="button" data-nav="-1">‹</button>
+            <div class="date-box" id="hmDateBox">2026. 09. 08 (화)</div>
+            <button type="button" data-nav="1">›</button>
+            <button type="button" class="tab" data-nav="today">오늘</button>
+          </div>
+        </div>
+        <!-- 일별: 인버터 요약 | 채널 상세 + (채널상세일 때) INV1~6 칩 -->
+        <div class="toolbar" id="hmDayBar" style="padding-top:8px">
+          <button class="tab on" data-mode="inv">인버터 요약</button>
+          <button class="tab" data-mode="ch">채널 상세</button>
+          <div class="inv-chips" id="hmDayInvChips" style="display:none;margin-left:8px"></div>
+          <span class="hint-inline" id="hmDayHint">범위: 사이트 전체 6대 · 행 클릭→채널 상세</span>
+        </div>
+        <!-- 월별: 사이트 전체 | INV1~6 (설계서 필터) -->
+        <div class="toolbar" id="hmMonthBar" style="padding-top:8px;display:none">
+          <button class="tab scope on" data-scope="site">사이트 전체</button>
+          <div class="inv-chips" id="hmMonthInvChips"></div>
+          <span class="hint-inline">필터: 전체 ↔ 인버터 1~6 · 일별 이동 시 유지</span>
+        </div>
+        <div class="hm41-shell">
+          <div class="hm41-main">
+            <div class="w-title" id="hmMainTitle" style="margin-bottom:6px">상태 히트맵</div>
+            <div class="w-sub" id="hmMainSub" style="margin-bottom:10px"></div>
+            <div id="hmVisual"></div>
+            <div class="legend-row" style="padding-left:0">
+              <span><i class="sq" style="background:#3a3a3a"></i>계산 안 함</span>
+              <span><i class="sq" style="background:var(--green)"></i>정상</span>
+              <span><i class="sq" style="background:var(--yellow)"></i>낮음</span>
+              <span><i class="sq" style="background:var(--orange)"></i>점검 권장</span>
+            </div>
+          </div>
+          <aside class="hm41-side">
+            <h4 id="hmCountTitle" style="margin:0 0 4px;font-size:14px">당일 상태 건수</h4>
+            <div class="w-sub" id="hmCountSub">범위: 사이트 전체</div>
+            <div class="count-bars" id="hmCountBars"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      문서(PPT v2.3 베이스 + v2.5 0041) 기준 인터랙션 목업.
+      파일: <code>Rwork/solar-dashboard-layout/index.html</code>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+  <div class="modal-back" id="modalBack">
+    <div class="modal">
+      <button class="close" id="modalClose" type="button">✕</button>
+      <h3 id="modalTitle">상세</h3>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const WEEK = ["일","월","화","수","목","금","토"];
+    const INV_COLORS = ["#f39c12","#56aaeb","#9b59b6","#2ecc71","#e74c3c","#f1c40f"];
+    const ST_COLOR = { ok:"#2ecc71", low:"#f1c40f", warn:"#e67e22", check:"#3498db", none:"#555" };
+    const ST_LABEL = { ok:"정상", low:"낮음", warn:"점검권장", check:"확인중", none:"계산안함" };
+    const ST_MSG = {
+      ok: "채널 출력이 인버터 평균과 비슷한 수준이에요.",
+      low: "출력이 평균보다 낮아요. 음영·오염을 확인해 보세요.",
+      warn: "전류가 거의 없어요. 배선·퓨즈·접속을 확인해 보세요.",
+      none: "일사·유효 데이터 부족으로 계산하지 않았어요.",
+      check: "값이 비정상 범위예요. 계측을 확인해 주세요."
+    };
+    const INV_EFF = [
+      { name:"인버터 1", pct:97.6, st:"정상", stClass:"st-ok" },
+      { name:"인버터 2", pct:96.2, st:"정상", stClass:"st-ok" },
+      { name:"인버터 3", pct:89.1, st:"보통", stClass:"st-low" },
+      { name:"인버터 4", pct:95.4, st:"정상", stClass:"st-ok" },
+      { name:"인버터 5", pct:94.8, st:"정상", stClass:"st-ok" },
+      { name:"인버터 6", pct:96.9, st:"정상", stClass:"st-ok" },
+    ];
+
+    const tooltip = document.getElementById("tooltip");
+    const modalBack = document.getElementById("modalBack");
+    function showTip(html, x, y) {
+      tooltip.innerHTML = html; tooltip.style.display = "block";
+      const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+      let left = x + 14, top = y + 14;
+      if (left + tw > innerWidth - 8) left = x - tw - 12;
+      if (top + th > innerHeight - 8) top = y - th - 12;
+      tooltip.style.left = left + "px"; tooltip.style.top = top + "px";
+    }
+    function hideTip() { tooltip.style.display = "none"; }
+    function openModal(title, html) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalBody").innerHTML = html;
+      modalBack.classList.add("show");
+    }
+    document.getElementById("modalClose").onclick = () => modalBack.classList.remove("show");
+    modalBack.addEventListener("click", e => { if (e.target === modalBack) modalBack.classList.remove("show"); });
+
+    function seed(n) { let x = n|0; return () => { x = (x * 1664525 + 1013904223) >>> 0; return x / 4294967296; }; }
+    function cloneDate(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+    function fmtDay(d) {
+      return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,"0")}. ${String(d.getDate()).padStart(2,"0")} (${WEEK[d.getDay()]})`;
+    }
+    function fmtMonth(d) { return `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,"0")}월`; }
+    function fmtYear(d) { return `${d.getFullYear()}년`; }
+    function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+    function addPeriod(date, period, dir) {
+      const d = cloneDate(date);
+      if (period === "day") d.setDate(d.getDate() + dir);
+      else if (period === "month") d.setMonth(d.getMonth() + dir);
+      else d.setFullYear(d.getFullYear() + dir);
+      return d;
+    }
+
+    // ---------- 0036 / 0038 ----------
+    document.querySelectorAll(".metric-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const isPr = card.dataset.detail === "pr";
+        openModal(isPr ? "발전 성능(PR) 상세" : "더위 영향 제외 성능(TPR) 상세", `
+          <table><tr><th>항목</th><th>내용</th></tr>
+          <tr><td>현재 값</td><td><b>${isPr ? "78.4" : "82.1"}</b></td></tr>
+          <tr><td>상태</td><td>정상</td></tr>
+          <tr><td>일사</td><td>748 W/m² (경사)</td></tr>
+          <tr><td>판정</td><td>${isPr ? "PR 정상 범위" : "온도 보정 후 정상"}</td></tr>
+          <tr><td>갱신</td><td>15분마다</td></tr></table>`);
+      });
+    });
+    const board = document.getElementById("invBoard");
+    INV_EFF.forEach((inv, i) => {
+      const el = document.createElement("div");
+      el.className = "inv-card";
+      el.innerHTML = `<div class="top"><span class="name">${inv.name}</span><span class="st ${inv.stClass}">${inv.st}</span></div>
+        <div class="pct" style="color:${INV_COLORS[i]}">${inv.pct}<span style="font-size:16px">%</span></div>
+        <div class="foot">DC→AC 변환</div>`;
+      el.onclick = () => openModal(`${inv.name} 변환효율 상세`, `
+        <table><tr><th>항목</th><th>값</th></tr>
+        <tr><td>변환효율</td><td><b>${inv.pct}%</b></td></tr>
+        <tr><td>상태</td><td>${inv.st}</td></tr>
+        <tr><td>DC 입력</td><td>${(42+i*1.2).toFixed(1)} kW</td></tr>
+        <tr><td>AC 출력</td><td>${((42+i*1.2)*inv.pct/100).toFixed(1)} kW</td></tr></table>`);
+      board.appendChild(el);
+    });
+
+    // ---------- data builders ----------
+    function dayLabels15() {
+      const labels = [];
+      for (let h = 6; h <= 18; h++) for (let m = 0; m < 60; m += 15) {
+        if (h === 18 && m > 0) break;
+        labels.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
+      }
+      return labels;
+    }
+
+    function buildPrData(period, date) {
+      const rnd = seed(date.getFullYear()*10000 + (date.getMonth()+1)*100 + date.getDate() + (period==="day"?1:period==="month"?2:3));
+      if (period === "day") {
+        const labels = dayLabels15();
+        const pr=[], tpr=[], irr=[], status=[];
+        labels.forEach((_, i) => {
+          const t = i / (labels.length - 1);
+          const bell = Math.sin(Math.PI * t);
+          let p = 72 + bell * 18 + (rnd()-0.5)*6;
+          let tp = p + 3.2 + (rnd()-0.5)*2;
+          let ir = Math.max(0, bell * 880 + (rnd()-0.5)*60);
+          if (i >= 22 && i <= 28) { p -= 12; tp -= 9; }
+          pr.push(+p.toFixed(1)); tpr.push(+tp.toFixed(1)); irr.push(Math.round(ir));
+          let st = "ok";
+          if (ir < 50) st = "none";
+          else if (p < 65 && ir >= 500) st = "warn";
+          else if (p < 70) st = "low";
+          else if (p > 100) st = "check";
+          status.push(st);
+        });
+        return { labels, pr, tpr, irr, status, showBand: true, markers: false, unitAvg: false };
+      }
+      if (period === "month") {
+        const n = daysInMonth(date.getFullYear(), date.getMonth());
+        const labels=[], pr=[], tpr=[], irr=[], status=[];
+        for (let d = 1; d <= n; d++) {
+          labels.push(d + "일");
+          const p = 70 + Math.sin(d/5)*8 + (rnd()-0.5)*6;
+          const tp = p + 3 + (rnd()-0.5)*2;
+          pr.push(+p.toFixed(1)); tpr.push(+tp.toFixed(1));
+          irr.push(Math.round(400 + Math.sin(d/4)*200 + rnd()*80));
+          status.push(p < 65 ? "warn" : p < 72 ? "low" : "ok");
+        }
+        return { labels, pr, tpr, irr, status, showBand: false, markers: true, unitAvg: true, drill: "day" };
+      }
+      const labels=[], pr=[], tpr=[], irr=[], status=[];
+      for (let m = 1; m <= 12; m++) {
+        labels.push(m + "월");
+        const p = 74 + Math.sin(m/2)*6 + (rnd()-0.5)*4;
+        pr.push(+p.toFixed(1)); tpr.push(+(p+3).toFixed(1));
+        irr.push(Math.round(450 + Math.sin(m/2.2)*180));
+        status.push("ok");
+      }
+      return { labels, pr, tpr, irr, status, showBand: false, markers: true, unitAvg: true, drill: "month" };
+    }
+
+    function buildInvData(period, date) {
+      const rnd = seed(9000 + date.getFullYear()*100 + date.getMonth()*10 + date.getDate() + period.length);
+      let labels;
+      if (period === "day") labels = dayLabels15();
+      else if (period === "month") labels = Array.from({length: daysInMonth(date.getFullYear(), date.getMonth())}, (_,i)=> (i+1)+"일");
+      else labels = Array.from({length:12}, (_,i)=> (i+1)+"월");
+      const lines = INV_EFF.map((inv, idx) => labels.map((_, i) => {
+        const t = i / Math.max(1, labels.length-1);
+        const bell = period === "day" ? Math.sin(Math.PI * t) : 0.8 + 0.2*Math.sin(i);
+        return +Math.min(99.5, Math.max(82, inv.pct - 2 + bell*2 + (rnd()-0.5)*1.5)).toFixed(1);
+      }));
+      const irr = labels.map((_, i) => {
+        const t = i / Math.max(1, labels.length-1);
+        return Math.round(Math.max(0, (period==="day" ? Math.sin(Math.PI*t) : 0.6+0.4*Math.sin(i/3)) * 900));
+      });
+      return {
+        labels, lines, irr,
+        showBand: false,
+        markers: period !== "day",
+        drill: period === "month" ? "day" : period === "year" ? "month" : null
+      };
+    }
+
+    // ---------- chart engine ----------
+    function mountChart(el, cfg) {
+      const pad = { l: 52, r: 48, t: 28, b: 36 };
+      let locked = null;
+      let hoverIdx = null;
+
+      function layout() {
+        const w = Math.max(320, el.clientWidth || 800);
+        const h = Math.max(240, el.clientHeight || 340);
+        return { w, h, iw: w - pad.l - pad.r, ih: h - pad.t - pad.b };
+      }
+      function yScale(v, min, max, ih) { return pad.t + ih - ((v - min) / (max - min || 1)) * ih; }
+      function xScale(i, n, iw) { return pad.l + (i / Math.max(1, n - 1)) * iw; }
+
+      function render() {
+        const data = cfg.getData();
+        const { w, h, iw, ih } = layout();
+        const n = data.labels.length;
+        const leftMin = cfg.leftMin ?? 0;
+        const leftMax = cfg.getLeftMax ? cfg.getLeftMax(data) : (cfg.leftMax ?? 100);
+        const rightMax = cfg.rightMax ?? 1000;
+        const idx = locked != null ? locked : hoverIdx;
+
+        let svg = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`;
+        for (let g = 0; g <= 4; g++) {
+          const y = pad.t + (ih * g) / 4;
+          svg += `<line x1="${pad.l}" y1="${y}" x2="${w-pad.r}" y2="${y}" stroke="#2a2a2a" stroke-dasharray="3 4"/>`;
+          const lv = leftMax - ((leftMax - leftMin) * g) / 4;
+          svg += `<text x="${pad.l-8}" y="${y+4}" fill="#777" font-size="11" text-anchor="end">${lv.toFixed(0)}</text>`;
+          if (cfg.rightAxis) {
+            const rv = rightMax - (rightMax * g) / 4;
+            svg += `<text x="${w-pad.r+8}" y="${y+4}" fill="#777" font-size="11">${rv.toFixed(0)}</text>`;
+          }
+        }
+        if (data.bars) {
+          const bw = Math.max(2, iw / n * 0.5);
+          data.bars.forEach((v, i) => {
+            const x = xScale(i, n, iw) - bw/2;
+            const y = yScale(v, 0, rightMax, ih);
+            svg += `<rect x="${x}" y="${y}" width="${bw}" height="${pad.t+ih-y}" fill="#3a3a3a" opacity=".85"/>`;
+          });
+        }
+        (data.lines || []).forEach(line => {
+          let d = "";
+          line.values.forEach((v, i) => {
+            const x = xScale(i, n, iw), y = yScale(v, leftMin, leftMax, ih);
+            d += (i ? "L" : "M") + x + "," + y;
+          });
+          svg += `<path d="${d}" fill="none" stroke="${line.color}" stroke-width="2.2"/>`;
+          if (data.markers) {
+            line.values.forEach((v, i) => {
+              const x = xScale(i, n, iw), y = yScale(v, leftMin, leftMax, ih);
+              svg += `<circle cx="${x}" cy="${y}" r="3.2" fill="${line.color}" stroke="#111" stroke-width="1"/>`;
+            });
+          }
+        });
+        if (idx != null && idx >= 0 && idx < n) {
+          const x = xScale(idx, n, iw);
+          svg += `<line x1="${x}" y1="${pad.t}" x2="${x}" y2="${pad.t+ih}" stroke="#5dade2" stroke-width="1.5"/>`;
+          (data.lines || []).forEach(line => {
+            const y = yScale(line.values[idx], leftMin, leftMax, ih);
+            svg += `<circle cx="${x}" cy="${y}" r="5" fill="${line.color}" stroke="#111" stroke-width="1.5"/>`;
+          });
+          svg += `<text x="${x}" y="${pad.t-8}" fill="#8ad4ff" font-size="11" text-anchor="middle">${data.labels[idx]} 선택</text>`;
+        }
+        const step = Math.max(1, Math.floor(n / 7));
+        for (let i = 0; i < n; i += step) {
+          svg += `<text x="${xScale(i,n,iw)}" y="${h-10}" fill="#777" font-size="11" text-anchor="middle">${data.labels[i]}</text>`;
+        }
+        svg += `</svg>`;
+        el.innerHTML = svg;
+        if (cfg.onRender) cfg.onRender(data, idx);
+      }
+
+      function idxFromEvent(e) {
+        const rect = el.getBoundingClientRect();
+        const { iw } = layout();
+        const data = cfg.getData();
+        const x = e.clientX - rect.left - pad.l;
+        const i = Math.round((x / iw) * (data.labels.length - 1));
+        return Math.max(0, Math.min(data.labels.length - 1, i));
+      }
+
+      el.addEventListener("mousemove", e => {
+        const i = idxFromEvent(e);
+        hoverIdx = locked != null ? null : i;
+        render();
+        if (locked == null && cfg.onHover) cfg.onHover(i, e);
+      });
+      el.addEventListener("mouseleave", () => { hoverIdx = null; hideTip(); render(); });
+      el.addEventListener("click", e => {
+        const i = idxFromEvent(e);
+        const data = cfg.getData();
+        if (data.drill && cfg.onDrill) {
+          cfg.onDrill(i, data);
+          return;
+        }
+        locked = i; hideTip(); render();
+        if (cfg.onSelect) cfg.onSelect(i, data);
+      });
+
+      new ResizeObserver(() => render()).observe(el);
+      return {
+        refresh: () => { locked = null; hoverIdx = null; render(); },
+        clearLock: () => { locked = null; render(); },
+        setLock: (i) => { locked = i; render(); if (cfg.onSelect) cfg.onSelect(i, cfg.getData()); }
+      };
+    }
+
+    // ---------- 0037 controller ----------
+    const prState = { period: "day", date: new Date(2026, 8, 8) };
+    let prCache = buildPrData(prState.period, prState.date);
+    const sidePr = document.getElementById("sidePr");
+    const bandPr = document.getElementById("bandPr");
+    const legendPr = document.getElementById("legendPr");
+
+    function updatePrChrome() {
+      const box = document.getElementById("prDateBox");
+      const hint = document.getElementById("prHint");
+      const drill = document.getElementById("prDrillHint");
+      document.querySelectorAll("#prToolbar [data-period]").forEach(b => {
+        b.classList.toggle("on", b.dataset.period === prState.period);
+      });
+      if (prState.period === "day") {
+        box.textContent = fmtDay(prState.date);
+        hint.textContent = "고객 EMS 전체 화면 · 15분 구간";
+        drill.textContent = "";
+        bandPr.classList.remove("hidden");
+        legendPr.innerHTML = `
+          <span><i style="background:var(--green)"></i>발전 성능(PR)</span>
+          <span><i style="background:var(--teal)"></i>더위 영향 제외(TPR)</span>
+          <span><i class="sq" style="background:#555"></i>햇빛의 세기</span>
+          <span><i class="sq" style="background:var(--green)"></i>정상</span>
+          <span><i class="sq" style="background:var(--yellow)"></i>낮음</span>
+          <span><i class="sq" style="background:var(--orange)"></i>점검권장</span>
+          <span><i class="sq" style="background:#555"></i>계산안함</span>`;
+      } else if (prState.period === "month") {
+        box.textContent = fmtMonth(prState.date);
+        hint.textContent = "일자별 하루 평균 성능";
+        drill.textContent = "점/막대 클릭 → 해당 일별 화면";
+        bandPr.classList.add("hidden");
+        legendPr.innerHTML = `
+          <span>지표 범례 · 월·연 화면에는 구간 상태 띠 없음</span>
+          <span><i style="background:var(--green)"></i>발전 성능(일평균)</span>
+          <span><i style="background:var(--teal)"></i>더위제외(일평균)</span>
+          <span><i class="sq" style="background:#555"></i>일 평균 일사</span>`;
+      } else {
+        box.textContent = fmtYear(prState.date);
+        hint.textContent = "월별 평균 성능";
+        drill.textContent = "점/막대 클릭 → 해당 월별 화면";
+        bandPr.classList.add("hidden");
+        legendPr.innerHTML = `
+          <span>지표 범례 · 월·연 화면에는 구간 상태 띠 없음</span>
+          <span><i style="background:var(--green)"></i>발전 성능(월평균)</span>
+          <span><i style="background:var(--teal)"></i>더위제외(월평균)</span>
+          <span><i class="sq" style="background:#555"></i>월 평균 일사</span>`;
+      }
+      sidePr.innerHTML = `<h4>선택 구간 상세</h4><div class="idle">${prState.period==="day"
+        ? "차트에 마우스를 올리면 수치가 보이고,<br>클릭하면 이곳에 상세가 고정됩니다."
+        : "호버로 수치 확인 · 클릭 시 하위 기간으로 이동합니다."}</div>`;
+    }
+
+    function fillPrSide(i) {
+      const st = prCache.status[i];
+      const avg = prCache.unitAvg ? "(평균) " : "";
+      sidePr.innerHTML = `
+        <h4>선택 구간 상세</h4>
+        <div class="w-sub">${prState.period==="day" ? fmtDay(prState.date)+" "+prCache.labels[i] : prCache.labels[i]}</div>
+        <div class="detail-status" style="border-color:${ST_COLOR[st]}">구간 상태: ${ST_LABEL[st]}</div>
+        <div class="dcard">
+          <div class="lab"><span>${avg}발전 성능</span><span class="st ${st==="ok"?"st-ok":st==="warn"?"st-warn":"st-low"}">${ST_LABEL[st]}</span></div>
+          <div class="val" style="color:#7dffa8">${prCache.pr[i]}%</div>
+          <div class="msg">${prCache.pr[i] < 70 ? "평소보다 낮은 상태가 이어지고 있어요" : "날씨 대비 발전 성능이 정상 범위예요"}</div>
+        </div>
+        <div class="dcard tpr">
+          <div class="lab"><span>${avg}더위 영향 제외</span></div>
+          <div class="val" style="color:#6ef0d8">${prCache.tpr[i]}%</div>
+          <div class="msg">${prCache.tpr[i] < 75 ? "더위를 제외해도 낮아요" : "더위 영향을 제외해도 성능이 좋아요"}</div>
+        </div>
+        <div class="w-sub">일사 ${prCache.irr[i]} W/m² · 인버터 변환은 WDGT0039</div>`;
+    }
+
+    const chartPrApi = mountChart(document.getElementById("chartPr"), {
+      leftMin: 40, leftMax: 100, rightMax: 1000, rightAxis: true,
+      getData: () => ({
+        labels: prCache.labels,
+        bars: prCache.irr,
+        markers: prCache.markers,
+        drill: prCache.drill,
+        lines: [
+          { name: "PR", color: "#2ecc71", values: prCache.pr },
+          { name: "TPR", color: "#1abc9c", values: prCache.tpr },
+        ],
+      }),
+      onRender: (data, idx) => {
+        if (!prCache.showBand) { bandPr.innerHTML = ""; return; }
+        bandPr.style.gridTemplateColumns = `repeat(${prCache.status.length}, 1fr)`;
+        bandPr.innerHTML = prCache.status.map((s, i) =>
+          `<span style="background:${ST_COLOR[s]};${i===idx?"outline:2px solid #fff;outline-offset:1px":""}"></span>`
+        ).join("");
+      },
+      onHover: (i, e) => {
+        showTip(`<div class="t">${prCache.labels[i]}</div>
+          <div class="r"><span style="color:#2ecc71">PR</span><span>${prCache.pr[i]}%</span></div>
+          <div class="r"><span style="color:#1abc9c">TPR</span><span>${prCache.tpr[i]}%</span></div>
+          <div class="r"><span>일사</span><span>${prCache.irr[i]} W/m²</span></div>
+          ${prCache.showBand ? `<div class="r"><span>상태</span><span>${ST_LABEL[prCache.status[i]]}</span></div>` : ""}`, e.clientX, e.clientY);
+      },
+      onSelect: (i) => fillPrSide(i),
+      onDrill: (i) => {
+        if (prState.period === "month") {
+          prState.period = "day";
+          prState.date = new Date(prState.date.getFullYear(), prState.date.getMonth(), i + 1);
+        } else if (prState.period === "year") {
+          prState.period = "month";
+          prState.date = new Date(prState.date.getFullYear(), i, 1);
+        }
+        refreshPr();
+      }
+    });
+
+    function refreshPr() {
+      prCache = buildPrData(prState.period, prState.date);
+      updatePrChrome();
+      chartPrApi.refresh();
+    }
+
+    document.getElementById("prToolbar").addEventListener("click", e => {
+      const t = e.target;
+      if (t.dataset.period) {
+        prState.period = t.dataset.period;
+        refreshPr();
+      } else if (t.dataset.nav) {
+        if (t.dataset.nav === "today") prState.date = new Date(2026, 8, 8);
+        else prState.date = addPeriod(prState.date, prState.period, +t.dataset.nav);
+        refreshPr();
+      }
+    });
+    updatePrChrome();
+
+    // ---------- 0039 controller ----------
+    const invState = { period: "day", date: new Date(2026, 8, 8) };
+    let invCache = buildInvData(invState.period, invState.date);
+    const sideInv = document.getElementById("sideInv");
+    const legendInv = document.getElementById("legendInv");
+
+    function updateInvChrome() {
+      document.querySelectorAll("#invToolbar [data-period]").forEach(b => {
+        b.classList.toggle("on", b.dataset.period === invState.period);
+      });
+      const box = document.getElementById("invDateBox");
+      const hint = document.getElementById("invHint");
+      const drill = document.getElementById("invDrillHint");
+      if (invState.period === "day") {
+        box.textContent = fmtDay(invState.date);
+        hint.textContent = "N선 + 일사 막대 · 15분";
+        drill.textContent = "";
+      } else if (invState.period === "month") {
+        box.textContent = fmtMonth(invState.date);
+        hint.textContent = "일자별 하루 평균 변환효율";
+        drill.textContent = "점 클릭 → 해당 일별";
+      } else {
+        box.textContent = fmtYear(invState.date);
+        hint.textContent = "월별 평균 변환효율";
+        drill.textContent = "점 클릭 → 해당 월별";
+      }
+      legendInv.innerHTML = INV_EFF.map((inv, i) =>
+        `<span><i style="background:${INV_COLORS[i]}"></i>${inv.name}</span>`
+      ).join("") + `<span><i class="sq" style="background:#555"></i>일사</span>`;
+      sideInv.innerHTML = `<h4>선택 구간 상세</h4><div class="idle">${invState.period==="day"
+        ? "호버로 수치 확인 · 클릭으로 상세 고정"
+        : "호버로 수치 확인 · 클릭 시 하위 기간으로 이동"}</div>`;
+    }
+
+    function fillInvSide(i) {
+      const rows = invCache.lines.map((vals, idx) =>
+        `<tr><td>${INV_EFF[idx].name}</td><td style="color:${INV_COLORS[idx]}"><b>${vals[i]}%</b></td></tr>`
+      ).join("");
+      sideInv.innerHTML = `
+        <h4>선택 구간 상세</h4>
+        <div class="w-sub">${invCache.labels[i]} · 일사 ${invCache.irr[i]} W/m²</div>
+        <div class="detail-status" style="border-color:#56aaeb">인버터 변환효율</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">${rows}</table>`;
+    }
+
+    const chartInvApi = mountChart(document.getElementById("chartInv"), {
+      leftMin: 80, leftMax: 100, rightMax: 1000, rightAxis: true,
+      getData: () => ({
+        labels: invCache.labels,
+        bars: invCache.irr,
+        markers: invCache.markers,
+        drill: invCache.drill,
+        lines: invCache.lines.map((values, i) => ({ name: INV_EFF[i].name, color: INV_COLORS[i], values })),
+      }),
+      onHover: (i, e) => {
+        const rows = invCache.lines.map((vals, idx) =>
+          `<div class="r"><span style="color:${INV_COLORS[idx]}">${INV_EFF[idx].name}</span><span>${vals[i]}%</span></div>`
+        ).join("");
+        showTip(`<div class="t">${invCache.labels[i]}</div>${rows}
+          <div class="r"><span>일사</span><span>${invCache.irr[i]} W/m²</span></div>`, e.clientX, e.clientY);
+      },
+      onSelect: (i) => fillInvSide(i),
+      onDrill: (i) => {
+        if (invState.period === "month") {
+          invState.period = "day";
+          invState.date = new Date(invState.date.getFullYear(), invState.date.getMonth(), i + 1);
+        } else if (invState.period === "year") {
+          invState.period = "month";
+          invState.date = new Date(invState.date.getFullYear(), i, 1);
+        }
+        refreshInv();
+      }
+    });
+
+    function refreshInv() {
+      invCache = buildInvData(invState.period, invState.date);
+      updateInvChrome();
+      chartInvApi.refresh();
+    }
+    document.getElementById("invToolbar").addEventListener("click", e => {
+      const t = e.target;
+      if (t.dataset.period) { invState.period = t.dataset.period; refreshInv(); }
+      else if (t.dataset.nav) {
+        if (t.dataset.nav === "today") invState.date = new Date(2026, 8, 8);
+        else invState.date = addPeriod(invState.date, invState.period, +t.dataset.nav);
+        refreshInv();
+      }
+    });
+    updateInvChrome();
+
+    // ---------- gen charts (인버터 6호기 선택) ----------
+    function buildInvDaySeries(kind) {
+      // kind: '15m' | 'cum'
+      const labels = Array.from({ length: 23 }, (_, i) => String(i).padStart(2, "0") + ":00");
+      const lines = INV_EFF.map((inv, idx) => {
+        const peak = 70 + idx * 5 + (idx === 2 ? -12 : 0);
+        const vals = labels.map((_, i) => {
+          const t = i / 22;
+          const bell = Math.max(0, Math.sin(Math.PI * Math.min(1, Math.max(0, (t - 0.22) / 0.55))));
+          return +(bell * peak * (0.92 + idx * 0.02)).toFixed(1);
+        });
+        if (kind === "cum") {
+          let c = 0;
+          return vals.map(v => { c += v / 8; return +c.toFixed(1); });
+        }
+        return vals;
+      });
+      return { labels, lines };
+    }
+    function mountInvGen(el, chipHost, title, builder, unit) {
+      const visible = [true, true, true, true, true, true];
+      let cache = builder();
+      let api;
+
+      function paintChips() {
+        chipHost.innerHTML = `<span class="w-sub" style="margin-right:4px">표시:</span>` +
+          INV_EFF.map((inv, i) =>
+            `<button type="button" class="inv-chip ${visible[i] ? "on" : ""}" data-inv="${i + 1}">${inv.name}</button>`
+          ).join("") +
+          `<button type="button" class="tab" data-all="1" style="margin-left:4px">전체</button>
+           <button type="button" class="tab" data-all="0">해제</button>`;
+        chipHost.querySelectorAll(".inv-chip").forEach(btn => {
+          btn.onclick = () => {
+            const i = +btn.dataset.inv - 1;
+            visible[i] = !visible[i];
+            if (!visible.some(Boolean)) visible[i] = true;
+            paintChips();
+            api.refresh();
+          };
+        });
+        chipHost.querySelectorAll("[data-all]").forEach(btn => {
+          btn.onclick = () => {
+            const on = btn.dataset.all === "1";
+            visible.forEach((_, i) => { visible[i] = on; });
+            if (!visible.some(Boolean)) visible[0] = true;
+            paintChips();
+            api.refresh();
+          };
+        });
+      }
+
+      api = mountChart(el, {
+        leftMin: 0,
+        getData: () => {
+          cache = builder();
+          return {
+            labels: cache.labels,
+            lines: cache.lines
+              .map((values, i) => ({ name: INV_EFF[i].name, color: INV_COLORS[i], values, _i: i }))
+              .filter(l => visible[l._i]),
+          };
+        },
+        getLeftMax: (data) => {
+          const vals = (data.lines || []).flatMap(l => l.values);
+          return Math.max(...(vals.length ? vals : [1]), 1) * 1.15;
+        },
+        onHover: (i, e) => {
+          const rows = cache.lines.map((vals, idx) => visible[idx]
+            ? `<div class="r"><span style="color:${INV_COLORS[idx]}">${INV_EFF[idx].name}</span><span>${vals[i]} ${unit}</span></div>`
+            : "").join("");
+          showTip(`<div class="t">${cache.labels[i]}</div>${rows}`, e.clientX, e.clientY);
+        },
+        onSelect: (i) => {
+          const rows = cache.lines.map((vals, idx) =>
+            `<tr><td style="color:${INV_COLORS[idx]}">${INV_EFF[idx].name}</td><td><b>${vals[i]} ${unit}</b>${visible[idx] ? "" : " (숨김)"}</td></tr>`
+          ).join("");
+          openModal(`${title} · ${cache.labels[i]}`, `<table><tr><th>인버터</th><th>값</th></tr>${rows}</table>`);
+        },
+      });
+      paintChips();
+      return api;
+    }
+
+    mountInvGen(document.getElementById("chartGen15"), document.getElementById("gen15Chips"), "15분 발전량", () => buildInvDaySeries("15m"), "kWh");
+    mountInvGen(document.getElementById("chartGenCum"), document.getElementById("genCumChips"), "누적발전량", () => buildInvDaySeries("cum"), "kWh");
+
+    // 이번달·해당년 = 전력량계 통합 (단일 비교선)
+    function meterMonth() {
+      const labels = Array.from({ length: 31 }, (_, i) => (i + 1) + "일");
+      let ca = 0, cb = 0;
+      const a = [], b = [];
+      labels.forEach((_, i) => {
+        ca += 38 + (i % 6) * 3;
+        cb += 35 + (i % 5) * 2.5;
+        a.push(+ca.toFixed(0));
+        b.push(+cb.toFixed(0));
+      });
+      return { labels, a, b };
+    }
+    function meterYear() {
+      const labels = Array.from({ length: 12 }, (_, i) => (i + 1) + "월");
+      let ca = 0, cb = 0;
+      const a = [], b = [];
+      labels.forEach((_, i) => {
+        ca += 95 + i * 4;
+        cb += 88 + i * 3.5;
+        a.push(+ca.toFixed(1));
+        b.push(+cb.toFixed(1));
+      });
+      return { labels, a, b };
+    }
+    function mountMeter(el, title, builder, unit, colorB) {
+      let cache = builder();
+      mountChart(el, {
+        leftMin: 0,
+        getData: () => {
+          cache = builder();
+          return {
+            labels: cache.labels,
+            lines: [
+              { name: "이번/올해", color: "#2ecc71", values: cache.a },
+              { name: "지난/작년", color: colorB, values: cache.b },
+            ],
+          };
+        },
+        getLeftMax: () => Math.max(...cache.a, ...cache.b, 1) * 1.15,
+        onHover: (i, e) => showTip(`<div class="t">${cache.labels[i]}</div>
+          <div class="r"><span style="color:#2ecc71">시리즈1</span><span>${cache.a[i]} ${unit}</span></div>
+          <div class="r"><span style="color:${colorB}">시리즈2</span><span>${cache.b[i]} ${unit}</span></div>
+          <div class="r"><span>기준</span><span>전력량계 통합</span></div>`, e.clientX, e.clientY),
+        onSelect: (i) => openModal(`${title} · ${cache.labels[i]}`, `
+          <p style="color:#aaa;font-size:13px;margin:0 0 8px">전력량계 통합 값 (인버터 합산 아님 · 단일 계측)</p>
+          <table><tr><th>항목</th><th>값</th></tr>
+          <tr><td>시리즈1</td><td><b>${cache.a[i]} ${unit}</b></td></tr>
+          <tr><td>시리즈2</td><td><b>${cache.b[i]} ${unit}</b></td></tr></table>`),
+      });
+    }
+    mountMeter(document.getElementById("chartGenMonth"), "이번달 발전량", meterMonth, "kWh", "#9b59b6");
+    mountMeter(document.getElementById("chartGenYear"), "해당년 발전량", meterYear, "MWh", "#888888");
+
+    // ---------- 0040 ----------
+    const channelsDemo = [
+      { v:612.4, i:8.2, p:5.0, st:"정상", cls:"st-ok", key:"ok" },
+      { v:608.1, i:8.0, p:4.9, st:"정상", cls:"st-ok", key:"ok" },
+      { v:590.0, i:2.1, p:1.2, st:"점검권장", cls:"st-warn", key:"warn" },
+      { v:611.2, i:7.9, p:4.8, st:"정상", cls:"st-ok", key:"ok" },
+      { v:605.5, i:7.6, p:4.6, st:"낮음", cls:"st-low", key:"low" },
+      { v:609.8, i:8.1, p:4.9, st:"정상", cls:"st-ok", key:"ok" },
+      { v:610.3, i:8.0, p:4.9, st:"정상", cls:"st-ok", key:"ok" },
+      { v:607.0, i:7.8, p:4.7, st:"정상", cls:"st-ok", key:"ok" },
+    ];
+    const invAcc = [
+      { id:1, name:"인버터 1", kw:42.8, st:"점검권장", cls:"st-warn", open:true },
+      { id:2, name:"인버터 2", kw:48.1, st:"정상", cls:"st-ok" },
+      { id:3, name:"인버터 3", kw:45.6, st:"낮음", cls:"st-low" },
+      { id:4, name:"인버터 4", kw:47.2, st:"정상", cls:"st-ok" },
+      { id:5, name:"인버터 5", kw:46.0, st:"정상", cls:"st-ok" },
+      { id:6, name:"인버터 6", kw:44.4, st:"정상", cls:"st-ok" },
+    ];
+    const accRoot = document.getElementById("accRoot");
+    invAcc.forEach(inv => {
+      const item = document.createElement("div");
+      item.className = "acc-item" + (inv.open ? " open" : "");
+      item.id = `acc-inv-${inv.id}`;
+      item.innerHTML = `
+        <div class="acc-sum"><span class="chev"></span><span class="acc-name">${inv.name}</span>
+          <span class="acc-kw">합계 ${inv.kw} kW</span><span class="st ${inv.cls}">${inv.st}</span></div>
+        <div class="acc-hint">채널 편차 심각도 최심값으로 인버터 뱃지 산정 · 합계 kW 미사용</div>
+        <div class="acc-body">
+          <div class="ch-row head"><span>채널</span><span>전압 V</span><span>전류 I</span><span>전력 P</span><span>상태</span></div>
+          ${channelsDemo.map((c,i)=>`
+            <div class="ch-row" data-ch="${i+1}" id="ch-${inv.id}-${i+1}">
+              <span>CH${i+1}</span><span>${c.v} V</span><span>${c.i} A</span><span>${(c.p+(inv.id===2?0.4:0)).toFixed(1)} kW</span>
+              <span class="st ${inv.id===2 && i!==2 && i!==4 ? "st-ok" : c.cls}">${inv.id===2 && i!==2 && i!==4 ? "정상" : c.st}</span>
+            </div>`).join("")}
+        </div>`;
+      item.querySelector(".acc-sum").onclick = () => item.classList.toggle("open");
+      item.querySelectorAll(".ch-row[data-ch]").forEach(row => {
+        row.style.cursor = "pointer";
+        row.onclick = () => {
+          const ch = +row.dataset.ch;
+          const c = channelsDemo[ch-1];
+          openModal(`${inv.name} · CH${ch} 상세`, `
+            <table><tr><th>항목</th><th>값</th></tr>
+            <tr><td>전압 V</td><td>${c.v} V</td></tr>
+            <tr><td>전류 I</td><td>${c.i} A</td></tr>
+            <tr><td>전력 P</td><td>${c.p} kW (=V×I)</td></tr>
+            <tr><td>상태</td><td>${c.st}</td></tr>
+            <tr><td>안내</td><td>${ST_MSG[c.key]}</td></tr></table>`);
+        };
+      });
+      accRoot.appendChild(item);
+    });
+
+    function focusChannel(invId, ch) {
+      document.getElementById("wdgt0040").scrollIntoView({ behavior: "smooth", block: "start" });
+      invAcc.forEach(inv => {
+        const el = document.getElementById(`acc-inv-${inv.id}`);
+        el.classList.toggle("open", inv.id === invId);
+      });
+      setTimeout(() => {
+        const row = document.getElementById(`ch-${invId}-${ch}`);
+        if (!row) return;
+        document.querySelectorAll(".ch-row.flash").forEach(r => r.classList.remove("flash"));
+        row.classList.add("flash");
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 350);
+    }
+
+    // ---------- 0041 (설계서 v2.5) ----------
+    // 일별: 인버터 요약(6행) | 채널 상세(INV1~6 칩 선택, CH8행)
+    // 월별: 사이트 전체 | INV1~6 필터 칩 (모드 탭 없음)
+    // 채널상세에서 고른 INV는 월별 필터로 유지
+    const hmState = {
+      period: "day",
+      mode: "inv",       // day only: inv | ch
+      filter: "site",     // site | inv  (월별·채널상세 연동)
+      invId: 2,
+      date: new Date(2026, 8, 8),
+    };
+
+    function hmSlots() { return dayLabels15().length; }
+
+    function statusAt(inv, ch, t) {
+      const v = (inv * 17 + ch * 9 + t * 3) % 47;
+      if (t < 4 || t > 44) return "none";
+      if (inv === 2 && ch === 4 && t >= 28 && t <= 34) return "warn";
+      if (inv === 2 && ch === 4 && t >= 20 && t <= 27) return "low";
+      if (inv === 1 && ch === 3 && t >= 24 && t <= 30) return "warn";
+      if (inv === 3 && t >= 18 && t <= 22) return "low";
+      if (v === 0) return "low";
+      if (v === 1) return "warn";
+      return "ok";
+    }
+    function worst(a, b) {
+      const rank = { none: 0, ok: 1, low: 2, warn: 3, check: 4 };
+      return rank[a] >= rank[b] ? a : b;
+    }
+    function monthDayStatus(day, scopeInv) {
+      if ([3, 8, 12, 15, 21, 22, 29].includes(day)) return "warn";
+      if ([5, 18].includes(day)) return "low";
+      if (scopeInv === 3 && day % 7 === 0) return "low";
+      if (scopeInv === 1 && day === 10) return "warn";
+      return "ok";
+    }
+    function countStatuses(scopeInv, mode) {
+      if (hmState.period === "month") {
+        return scopeInv == null
+          ? { ok: 8200, low: 210, warn: 96, none: 2400 }
+          : { ok: 1200, low: 40, warn: 18, none: 380 };
+      }
+      const n = hmSlots();
+      const counts = { ok: 0, low: 0, warn: 0, none: 0 };
+      if (mode === "inv" && scopeInv == null) {
+        // 설계: 인버터 요약 막대 = 사이트 전체(6×8×15분 합산)
+        for (let inv = 1; inv <= 6; inv++)
+          for (let ch = 1; ch <= 8; ch++)
+            for (let t = 0; t < n; t++) {
+              const s = statusAt(inv, ch, t);
+              counts[s]++;
+            }
+      } else {
+        const inv = scopeInv || hmState.invId;
+        for (let ch = 1; ch <= 8; ch++)
+          for (let t = 0; t < n; t++) {
+            const s = statusAt(inv, ch, t);
+            counts[s]++;
+          }
+      }
+      return counts;
+    }
+
+    function renderCountBars(counts, sub) {
+      document.getElementById("hmCountSub").textContent = sub;
+      document.getElementById("hmCountTitle").textContent =
+        hmState.period === "month" ? "이번 달 상태 건수" : "당일 상태 건수";
+      const max = Math.max(counts.ok || 0, counts.low || 0, counts.warn || 0, counts.none || 0, 1);
+      const items = [
+        ["정상", ST_COLOR.ok, counts.ok || 0],
+        ["낮음", ST_COLOR.low, counts.low || 0],
+        ["점검", ST_COLOR.warn, counts.warn || 0],
+        ["계산안함", ST_COLOR.none, counts.none || 0],
+      ];
+      document.getElementById("hmCountBars").innerHTML = items.map(([lab, color, n]) => `
+        <div class="count-col">
+          <div class="n">${n}</div>
+          <div class="bar" style="height:${Math.max(8, (n / max) * 150)}px;background:${color}"></div>
+          <div class="l">${lab}</div>
+        </div>`).join("");
+    }
+
+    function paintDayInvChips() {
+      const host = document.getElementById("hmDayInvChips");
+      host.innerHTML = INV_EFF.map((inv, i) => {
+        const id = i + 1;
+        return `<button type="button" class="inv-chip ${hmState.invId === id ? "on" : ""}" data-inv="${id}">${inv.name}</button>`;
+      }).join("");
+      host.querySelectorAll(".inv-chip").forEach(btn => {
+        btn.onclick = () => {
+          hmState.invId = +btn.dataset.inv;
+          hmState.filter = "inv";
+          refreshHm();
+        };
+      });
+    }
+    function paintMonthInvChips() {
+      const host = document.getElementById("hmMonthInvChips");
+      host.innerHTML = INV_EFF.map((inv, i) => {
+        const id = i + 1;
+        const on = hmState.filter === "inv" && hmState.invId === id;
+        return `<button type="button" class="inv-chip ${on ? "on" : ""}" data-inv="${id}">${inv.name}</button>`;
+      }).join("");
+      host.querySelectorAll(".inv-chip").forEach(btn => {
+        btn.onclick = () => {
+          hmState.filter = "inv";
+          hmState.invId = +btn.dataset.inv;
+          refreshHm();
+        };
+      });
+      document.querySelectorAll("#hmMonthBar [data-scope]").forEach(b => {
+        b.classList.toggle("on", hmState.filter === "site");
+      });
+    }
+
+    function renderHeatmap() {
+      const visual = document.getElementById("hmVisual");
+      const n = hmSlots();
+      const labels = dayLabels15();
+
+      if (hmState.period === "month") {
+        const scopeInv = hmState.filter === "inv" ? hmState.invId : null;
+        document.getElementById("hmMainTitle").textContent =
+          `월 캘린더 · ${scopeInv ? "인버터 " + scopeInv + "만" : "사이트 전체"}`;
+        document.getElementById("hmMainSub").textContent =
+          "날짜 칸 = 그날 최심 상태 라벨(네모+글씨) · 클릭→일별(필터 유지)";
+        const y = hmState.date.getFullYear(), m = hmState.date.getMonth();
+        const firstDow = new Date(y, m, 1).getDay();
+        const dim = daysInMonth(y, m);
+        let html = `<div class="cal-grid">`;
+        ["일", "월", "화", "수", "목", "금", "토"].forEach(d => html += `<div class="cal-head">${d}</div>`);
+        for (let i = 0; i < firstDow; i++) html += `<div class="cal-cell empty"></div>`;
+        for (let day = 1; day <= dim; day++) {
+          const st = monthDayStatus(day, scopeInv);
+          html += `<div class="cal-cell" data-day="${day}">
+            <div class="cal-day">${day}</div>
+            <div class="cal-st" style="background:${ST_COLOR[st]}22;color:${ST_COLOR[st]};border:1px solid ${ST_COLOR[st]}99">${ST_LABEL[st]}</div>
+          </div>`;
+        }
+        html += `</div>`;
+        visual.innerHTML = html;
+        visual.querySelectorAll(".cal-cell[data-day]").forEach(cell => {
+          cell.onclick = () => {
+            const day = +cell.dataset.day;
+            hmState.period = "day";
+            hmState.date = new Date(y, m, day);
+            if (hmState.filter === "inv") hmState.mode = "ch";
+            else hmState.mode = "inv";
+            refreshHm();
+          };
+          cell.onmousemove = e => {
+            const day = +cell.dataset.day;
+            const st = monthDayStatus(day, scopeInv);
+            showTip(`<div class="t">${y}.${m + 1}.${day}</div>
+              <div class="r"><span>최심 상태</span><span>${ST_LABEL[st]}</span></div>
+              <div class="r"><span>클릭</span><span>일별로 이동</span></div>`, e.clientX, e.clientY);
+          };
+          cell.onmouseleave = hideTip;
+        });
+        renderCountBars(
+          countStatuses(scopeInv, "month"),
+          `범위: ${scopeInv ? "인버터 " + scopeInv + "만" : "사이트 전체"}`
+        );
+        return;
+      }
+
+      // ---- 일별 ----
+      let rowLabels = [];
+      if (hmState.mode === "inv") {
+        document.getElementById("hmMainTitle").textContent = "상태 히트맵 (인버터 × 15분)";
+        document.getElementById("hmMainSub").textContent = "칸 호버=롤업+채널 건수 · 행/칸 클릭→채널 상세";
+        for (let inv = 1; inv <= 6; inv++) rowLabels.push({ type: "inv", inv, label: "INV" + inv });
+      } else {
+        const inv = hmState.invId;
+        document.getElementById("hmMainTitle").textContent = `상태 히트맵 (INV${inv} · 채널 × 15분)`;
+        document.getElementById("hmMainSub").textContent = "칸 호버=상태+안내 · 클릭→0040 V/I/P · 위 칩으로 INV1~6 선택";
+        for (let ch = 1; ch <= 8; ch++) rowLabels.push({ type: "ch", inv, ch, label: "CH" + ch });
+      }
+
+      visual.innerHTML = "";
+      const grid = document.createElement("div");
+      grid.className = "hm-grid";
+      grid.style.gridTemplateColumns = `64px repeat(${n}, 1fr)`;
+
+      rowLabels.forEach(row => {
+        const lab = document.createElement("div");
+        lab.className = "hm-lab" + (row.type === "inv" ? " hm-row-click" : "");
+        lab.textContent = row.label;
+        if (row.type === "inv") {
+          lab.onclick = () => {
+            hmState.mode = "ch";
+            hmState.invId = row.inv;
+            hmState.filter = "inv";
+            refreshHm();
+          };
+        }
+        grid.appendChild(lab);
+
+        for (let t = 0; t < n; t++) {
+          let st = "none";
+          if (row.type === "inv") {
+            for (let ch = 1; ch <= 8; ch++) st = worst(st, statusAt(row.inv, ch, t));
+          } else {
+            st = statusAt(row.inv, row.ch, t);
+          }
+          const cell = document.createElement("div");
+          cell.className = "hm-cell" + (st === "ok" ? "" : st === "low" ? " low" : st === "warn" ? " warn" : " none");
+          const timeLab = labels[t];
+          const next = labels[t + 1] || "18:15";
+          cell.onmousemove = e => {
+            if (row.type === "inv") {
+              const cnt = { ok: 0, low: 0, warn: 0, none: 0 };
+              for (let ch = 1; ch <= 8; ch++) cnt[statusAt(row.inv, ch, t)]++;
+              showTip(`<div class="t">${row.label} · ${timeLab}~${next}</div>
+                <div class="r"><span>인버터 상태</span><span>${ST_LABEL[st]}</span></div>
+                <div class="r"><span>채널 내역</span><span>점검 ${cnt.warn} · 낮음 ${cnt.low} · 정상 ${cnt.ok}</span></div>`, e.clientX, e.clientY);
+            } else {
+              showTip(`<div class="t">CH${row.ch} · ${timeLab}~${next}</div>
+                <div class="r"><span>상태</span><span>${ST_LABEL[st]}</span></div>
+                <div class="r"><span>안내</span><span>${ST_MSG[st]}</span></div>`, e.clientX, e.clientY);
+            }
+          };
+          cell.onmouseleave = hideTip;
+          cell.onclick = () => {
+            if (row.type === "inv") {
+              hmState.mode = "ch";
+              hmState.invId = row.inv;
+              hmState.filter = "inv";
+              refreshHm();
+            } else {
+              focusChannel(row.inv, row.ch);
+            }
+          };
+          grid.appendChild(cell);
+        }
+      });
+      visual.appendChild(grid);
+
+      const xlab = document.createElement("div");
+      xlab.style.cssText = "display:grid;grid-template-columns:64px 1fr;margin-top:4px;font-size:11px;color:#777";
+      const times = document.createElement("div");
+      times.style.cssText = "display:flex;justify-content:space-between;padding:0 2px";
+      ["06", "08", "10", "12", "14", "16", "18"].forEach(t => {
+        const s = document.createElement("span"); s.textContent = t; times.appendChild(s);
+      });
+      xlab.innerHTML = "<span></span>";
+      xlab.appendChild(times);
+      visual.appendChild(xlab);
+
+      if (hmState.mode === "inv") {
+        renderCountBars(countStatuses(null, "inv"), "범위: 사이트 전체 · 6인버터 × 8채널 × 15분");
+      } else {
+        renderCountBars(
+          countStatuses(hmState.invId, "ch"),
+          `범위: 인버터 ${hmState.invId}만 · 8채널 × 15분`
+        );
+      }
+    }
+
+    function refreshHm() {
+      document.querySelectorAll("#hmToolbar [data-period]").forEach(b => {
+        b.classList.toggle("on", b.dataset.period === hmState.period);
+      });
+      document.getElementById("hmDateBox").textContent =
+        hmState.period === "day" ? fmtDay(hmState.date) : fmtMonth(hmState.date);
+
+      const dayBar = document.getElementById("hmDayBar");
+      const monthBar = document.getElementById("hmMonthBar");
+      if (hmState.period === "day") {
+        dayBar.style.display = "flex";
+        monthBar.style.display = "none";
+        document.querySelectorAll("#hmDayBar [data-mode]").forEach(b => {
+          b.classList.toggle("on", b.dataset.mode === hmState.mode);
+        });
+        const chips = document.getElementById("hmDayInvChips");
+        const hint = document.getElementById("hmDayHint");
+        if (hmState.mode === "ch") {
+          chips.style.display = "flex";
+          paintDayInvChips();
+          hint.textContent = `채널 상세 · 인버터 ${hmState.invId} 선택 중 (칩으로 1~6 전환) · 월별로 가도 유지`;
+        } else {
+          chips.style.display = "none";
+          hint.textContent = "범위: 사이트 전체 6대 · 행 클릭→채널 상세";
+        }
+      } else {
+        dayBar.style.display = "none";
+        monthBar.style.display = "flex";
+        paintMonthInvChips();
+      }
+      renderHeatmap();
+    }
+
+    document.getElementById("hmToolbar").addEventListener("click", e => {
+      const t = e.target;
+      if (t.dataset.period) {
+        hmState.period = t.dataset.period;
+        // 월별 진입: 채널상세였으면 인버터 필터 유지, 요약이었으면 사이트 전체
+        if (hmState.period === "month") {
+          if (hmState.mode === "ch") hmState.filter = "inv";
+          else if (hmState.filter !== "inv") hmState.filter = "site";
+        }
+        refreshHm();
+      } else if (t.dataset.nav) {
+        if (t.dataset.nav === "today") hmState.date = new Date(2026, 8, 8);
+        else hmState.date = addPeriod(hmState.date, hmState.period, +t.dataset.nav);
+        refreshHm();
+      }
+    });
+    document.getElementById("hmDayBar").addEventListener("click", e => {
+      const t = e.target.closest("[data-mode]");
+      if (!t) return;
+      hmState.mode = t.dataset.mode;
+      if (hmState.mode === "inv") {
+        // 요약 복귀 — 필터는 site로 (설계: 요약 막대=사이트 전체)
+        hmState.filter = "site";
+      } else {
+        hmState.filter = "inv";
+      }
+      refreshHm();
+    });
+    document.getElementById("hmMonthBar").addEventListener("click", e => {
+      if (e.target.dataset.scope === "site") {
+        hmState.filter = "site";
+        refreshHm();
+      }
+    });
+
+    refreshHm();
+    chartPrApi.refresh();
+    chartInvApi.refresh();
+  })();
+  </script>
+</body>
+</html>
