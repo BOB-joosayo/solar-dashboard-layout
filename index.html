@@ -169,8 +169,10 @@
     .hm-row-click { cursor: pointer; }
     .select-inv {
       background: #222; color: #eee; border: 1px solid var(--line); border-radius: 8px;
-      padding: 6px 10px; font-size: 13px;
+      padding: 7px 28px 7px 12px; font-size: 13px; min-width: 120px;
+      appearance: auto; cursor: pointer;
     }
+    .select-inv:focus { outline: 1px solid var(--accent); }
     .inv-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .inv-chip {
       border: 1px solid var(--line); background: #222; color: var(--dim);
@@ -437,11 +439,18 @@
             <button type="button" class="tab" data-nav="today">오늘</button>
           </div>
         </div>
-        <!-- 일별: 인버터 요약 | 채널 상세 + (채널상세일 때) INV1~6 칩 -->
+        <!-- 일별: 인버터 요약 | 채널 상세 + (채널상세일 때) 인버터 드롭다운 -->
         <div class="toolbar" id="hmDayBar" style="padding-top:8px">
           <button class="tab on" data-mode="inv">인버터 요약</button>
           <button class="tab" data-mode="ch">채널 상세</button>
-          <div class="inv-chips" id="hmDayInvChips" style="display:none;margin-left:8px"></div>
+          <select class="select-inv" id="hmDayInvSelect" style="display:none;margin-left:8px" aria-label="인버터 선택">
+            <option value="1">인버터 1</option>
+            <option value="2" selected>인버터 2</option>
+            <option value="3">인버터 3</option>
+            <option value="4">인버터 4</option>
+            <option value="5">인버터 5</option>
+            <option value="6">인버터 6</option>
+          </select>
           <span class="hint-inline" id="hmDayHint">범위: 사이트 전체 6대 · 행 클릭→채널 상세</span>
         </div>
         <!-- 월별: 사이트 전체 | INV1~6 (설계서 필터) -->
@@ -1191,7 +1200,7 @@
     }
 
     // ---------- 0041 (설계서 v2.5) ----------
-    // 일별: 인버터 요약(6행) | 채널 상세(INV1~6 칩 선택, CH8행)
+    // 일별: 인버터 요약(6행) | 채널 상세(드롭다운으로 INV 선택, CH8행)
     // 월별: 사이트 전체 | INV1~6 필터 칩 (모드 탭 없음)
     // 채널상세에서 고른 INV는 월별 필터로 유지
     const hmState = {
@@ -1272,19 +1281,9 @@
         </div>`).join("");
     }
 
-    function paintDayInvChips() {
-      const host = document.getElementById("hmDayInvChips");
-      host.innerHTML = INV_EFF.map((inv, i) => {
-        const id = i + 1;
-        return `<button type="button" class="inv-chip ${hmState.invId === id ? "on" : ""}" data-inv="${id}">${inv.name}</button>`;
-      }).join("");
-      host.querySelectorAll(".inv-chip").forEach(btn => {
-        btn.onclick = () => {
-          hmState.invId = +btn.dataset.inv;
-          hmState.filter = "inv";
-          refreshHm();
-        };
-      });
+    function syncDayInvSelect() {
+      const sel = document.getElementById("hmDayInvSelect");
+      sel.value = String(hmState.invId);
     }
     function paintMonthInvChips() {
       const host = document.getElementById("hmMonthInvChips");
@@ -1365,7 +1364,7 @@
       } else {
         const inv = hmState.invId;
         document.getElementById("hmMainTitle").textContent = `상태 히트맵 (INV${inv} · 채널 × 15분)`;
-        document.getElementById("hmMainSub").textContent = "칸 호버=상태+안내 · 클릭→0040 V/I/P · 위 칩으로 INV1~6 선택";
+        document.getElementById("hmMainSub").textContent = "칸 호버=상태+안내 · 클릭→0040 V/I/P · 드롭다운으로 INV1~6 선택";
         for (let ch = 1; ch <= 8; ch++) rowLabels.push({ type: "ch", inv, ch, label: "CH" + ch });
       }
 
@@ -1464,14 +1463,14 @@
         document.querySelectorAll("#hmDayBar [data-mode]").forEach(b => {
           b.classList.toggle("on", b.dataset.mode === hmState.mode);
         });
-        const chips = document.getElementById("hmDayInvChips");
+        const invSelect = document.getElementById("hmDayInvSelect");
         const hint = document.getElementById("hmDayHint");
         if (hmState.mode === "ch") {
-          chips.style.display = "flex";
-          paintDayInvChips();
-          hint.textContent = `채널 상세 · 인버터 ${hmState.invId} 선택 중 (칩으로 1~6 전환) · 월별로 가도 유지`;
+          invSelect.style.display = "";
+          syncDayInvSelect();
+          hint.textContent = `채널 상세 · 드롭다운으로 인버터 선택 (현재 ${hmState.invId}호기) · 월별로 가도 유지`;
         } else {
-          chips.style.display = "none";
+          invSelect.style.display = "none";
           hint.textContent = "범위: 사이트 전체 6대 · 행 클릭→채널 상세";
         }
       } else {
@@ -1503,11 +1502,16 @@
       if (!t) return;
       hmState.mode = t.dataset.mode;
       if (hmState.mode === "inv") {
-        // 요약 복귀 — 필터는 site로 (설계: 요약 막대=사이트 전체)
         hmState.filter = "site";
       } else {
         hmState.filter = "inv";
       }
+      refreshHm();
+    });
+    document.getElementById("hmDayInvSelect").addEventListener("change", e => {
+      hmState.invId = +e.target.value;
+      hmState.filter = "inv";
+      hmState.mode = "ch";
       refreshHm();
     });
     document.getElementById("hmMonthBar").addEventListener("click", e => {
