@@ -190,6 +190,40 @@
       display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
       padding: 8px 0 4px;
     }
+
+    /* WDGT0035 profit */
+    .profit-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      padding: 12px 16px 8px;
+    }
+    .profit-kpi {
+      background: var(--card2); border: 1px solid var(--line); border-radius: 10px;
+      padding: 14px 16px; min-height: 96px;
+    }
+    .profit-kpi .lab { font-size: 12px; color: var(--dim); margin-bottom: 8px; }
+    .profit-kpi .val { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+    .profit-kpi .sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .profit-kpi .val.g { color: #7dffa8; }
+    .profit-kpi .val.o { color: #f5b041; }
+    .profit-kpi .val.b { color: #85c1e9; }
+    .profit-body {
+      display: grid; grid-template-columns: 1.4fr 0.9fr; gap: 12px;
+      padding: 8px 16px 16px;
+    }
+    .profit-panel {
+      background: var(--card2); border: 1px solid var(--line); border-radius: 10px;
+      padding: 12px 14px; min-height: 280px;
+    }
+    .profit-panel h4 { margin: 0 0 10px; font-size: 13px; }
+    .price-list { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+    .price-list .row2 {
+      display: flex; justify-content: space-between; gap: 12px;
+      padding: 6px 0; border-bottom: 1px solid #2a2a2a;
+    }
+    .price-list .k { color: var(--dim); }
+    .price-list .v { font-weight: 600; text-align: right; }
+    .bar-chart { width: 100%; height: 220px; }
+    .bar-chart svg { width: 100%; height: 100%; display: block; }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
     .cal-head { text-align: center; font-size: 12px; color: var(--dim); padding: 4px; }
     .cal-cell {
@@ -230,7 +264,7 @@
       <h1>태양광 대시보드 배치 목업 — 문서 기능 전체 구현</h1>
       <p>
         PNG 없음 · 더미 데이터. 0037/0039 <strong>일·월·연</strong> 전환·날짜이동·호버·클릭상세·월/연→일 드릴다운.
-        0041 <strong>일/월만</strong>·인버터요약↔채널상세·필터유지·월캘린더·건수막대. 보류(0042~44)·장애·국소선택바 제외.
+        0041 <strong>일/월만</strong>·인버터요약↔채널상세·필터유지·월캘린더·건수막대.         보류(0042~44)·장애·국소선택바 제외. <strong>WDGT0035</strong> SMP·REC 수익 포함.
       </p>
     </div>
 
@@ -287,9 +321,46 @@
       </div>
     </section>
 
-    <!-- 3 -->
+    <!-- 3 WDGT0035 -->
     <section class="section">
-      <div class="section-head"><h3>3. 성능 현황 <span class="pill pill-p">PPT</span></h3><span class="hint">클릭 → 설명 모달</span></div>
+      <div class="section-head">
+        <h3>3. SMP · REC 누적 산정 수익 <span class="pill pill-p">PPT WDGT0035</span></h3>
+        <span class="hint">일/월/연 · KPI 4장 · 막대 클릭 드릴다운</span>
+      </div>
+      <div class="widget" id="wdgt0035">
+        <div class="size-tag"><span class="id">WDGT0035</span> · W 100% · H ≈ 520</div>
+        <div class="w-head">
+          <div class="w-title">SMP · REC 누적 산정 수익</div>
+          <div class="w-sub" id="p35Hint">기준 시각 — · 15분 갱신</div>
+        </div>
+        <div class="toolbar" id="p35Toolbar">
+          <button class="tab on" data-period="day">일별</button>
+          <button class="tab" data-period="month">월별</button>
+          <button class="tab" data-period="year">연별</button>
+          <div class="date-nav">
+            <button type="button" data-nav="-1">‹</button>
+            <div class="date-box" id="p35DateBox">2026. 09. 08 (화)</div>
+            <button type="button" data-nav="1">›</button>
+            <button type="button" class="tab" data-nav="today">오늘</button>
+          </div>
+        </div>
+        <div class="profit-kpis" id="p35Kpis"></div>
+        <div class="profit-body">
+          <div class="profit-panel">
+            <h4 id="p35ChartTitle">시간대별 산정 수익 (원)</h4>
+            <div class="bar-chart" id="p35Chart"></div>
+          </div>
+          <div class="profit-panel">
+            <h4 id="p35PriceTitle">적용 시세 (일별)</h4>
+            <div class="price-list" id="p35Price"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="section">
+      <div class="section-head"><h3>4. 성능 현황 <span class="pill pill-p">PPT</span></h3><span class="hint">클릭 → 설명 모달</span></div>
       <div class="row">
         <div class="widget" style="flex:1.05" id="wdgt0036">
           <div class="size-tag"><span class="id">WDGT0036</span> · ≈52% · H ≈ 360</div>
@@ -319,9 +390,9 @@
       </div>
     </section>
 
-    <!-- 4 -->
+    <!-- 5 -->
     <section class="section">
-      <div class="section-head"><h3>4. 성능 추이 <span class="pill pill-p">PPT</span></h3><span class="hint">일/월/연 · 호버·클릭 · 월·연 클릭 시 일별 드릴다운</span></div>
+      <div class="section-head"><h3>5. 성능 추이 <span class="pill pill-p">PPT</span></h3><span class="hint">일/월/연 · 호버·클릭 · 월·연 클릭 시 일별 드릴다운</span></div>
 
       <div class="widget" style="margin-bottom:var(--gap)" id="wdgt0037">
         <div class="size-tag"><span class="id">WDGT0037</span> · W 100% · H ≈ 560</div>
@@ -381,7 +452,7 @@
 
     <!-- 5 -->
     <section class="section">
-      <div class="section-head"><h3>5. 발전량 Trend <span class="pill pill-e">기존</span></h3><span class="hint">상단 2개=인버터별 · 하단 2개=전력량계 통합</span></div>
+      <div class="section-head"><h3>6. 발전량 Trend <span class="pill pill-e">기존</span></h3><span class="hint">상단 2개=인버터별 · 하단 2개=전력량계 통합</span></div>
       <div class="row" style="margin-bottom:var(--gap)">
         <div class="widget chart-panel" style="flex:1">
           <div class="size-tag"><span class="id">GEN-15M</span> · 50% · H ≈ 400</div>
@@ -418,7 +489,7 @@
 
     <!-- 6 -->
     <section class="section">
-      <div class="section-head"><h3>6. PV 채널 현황 · 상태 이력 <span class="pill pill-p">PPT</span></h3><span class="hint">0040 아코디언 · 0041 일/월·필터·드릴다운</span></div>
+      <div class="section-head"><h3>7. PV 채널 현황 · 상태 이력 <span class="pill pill-p">PPT</span></h3><span class="hint">0040 아코디언 · 0041 일/월·필터·드릴다운</span></div>
 
       <div class="widget" style="margin-bottom:var(--gap)" id="wdgt0040">
         <div class="size-tag"><span class="id">WDGT0040</span> · W 100%</div>
@@ -996,6 +1067,199 @@
       }
     });
     updateInvChrome();
+
+    // ---------- WDGT0035 SMP·REC 수익 ----------
+    const p35 = { period: "day", date: new Date(2026, 8, 8) };
+    function won(n) { return Math.round(n).toLocaleString("ko-KR") + " 원"; }
+    function kwh(n) { return n.toLocaleString("ko-KR", { maximumFractionDigits: 1 }) + " kWh"; }
+
+    function buildP35(period, date) {
+      const rnd = seed(3500 + date.getFullYear() * 100 + date.getMonth() * 10 + date.getDate() + period.length);
+      if (period === "day") {
+        const labels = [];
+        const bars = [];
+        for (let h = 6; h <= 17; h++) {
+          labels.push(String(h).padStart(2, "0") + "시");
+          const bell = Math.sin(Math.PI * ((h - 6) / 11));
+          bars.push(Math.round(Math.max(0, bell * 28000 + (rnd() - 0.5) * 4000)));
+        }
+        const gen = 1247.5;
+        const smp = bars.reduce((a, b) => a + b, 0) * 0.55;
+        const rec = Math.round((gen / 1000) * 70000 * 1.2);
+        return {
+          labels, bars,
+          kpis: [
+            { lab: "선택일 발전량", val: kwh(gen), sub: "15분 증분 합산", cls: "g" },
+            { lab: "SMP 누적 수익", val: won(smp), sub: "시간대별 SMP × ΔkWh", cls: "g" },
+            { lab: "REC 누적 수익", val: won(rec), sub: "REC × 가중치 1.2", cls: "o" },
+            { lab: "합산 누적 수익", val: won(smp + rec), sub: "SMP + REC", cls: "b" },
+          ],
+          price: [
+            ["SMP 적용방식", "시간대별 × 15분발전"],
+            ["현재 구간 SMP", "110 원/kWh"],
+            ["당일 SMP 범위", "82 ~ 145 원"],
+            ["REC 현물단가", "70,000 원/REC"],
+            ["REC 가중치", "1.20"],
+            ["최종 수집", "오늘 14:10"],
+          ],
+          chartTitle: "시간대별 산정 수익 (원)",
+          priceTitle: "적용 시세 (일별)",
+          hint: "기준 시각 14:15 · 15분 갱신",
+          drill: null,
+        };
+      }
+      if (period === "month") {
+        const n = daysInMonth(date.getFullYear(), date.getMonth());
+        const labels = [], bars = [];
+        for (let d = 1; d <= n; d++) {
+          labels.push(d + "일");
+          bars.push(Math.round(180000 + Math.sin(d / 4) * 80000 + rnd() * 40000));
+        }
+        const gen = 38420;
+        const smp = 4210800, rec = 3226080;
+        return {
+          labels, bars,
+          kpis: [
+            { lab: "선택월 발전량", val: kwh(gen), sub: "일별 합산", cls: "g" },
+            { lab: "SMP 월 누적 수익", val: won(smp), sub: "일별 SMP수익 합산", cls: "g" },
+            { lab: "REC 월 누적 수익", val: won(rec), sub: "일별 REC수익 합산", cls: "o" },
+            { lab: "합산 월 누적 수익", val: won(smp + rec), sub: "SMP + REC", cls: "b" },
+          ],
+          price: [
+            ["SMP 산정방식", "일별 수익 합산"],
+            ["월 가중평균 SMP", "109.6 원/kWh"],
+            ["(참고·역산)", "월 SMP수익 ÷ 월 kWh"],
+            ["REC 월평균 단가", "68,500 원/REC"],
+            ["REC 가중치", "1.20"],
+            ["데이터", "KPX 시간대별 보관"],
+          ],
+          chartTitle: "일별 산정 수익 (원)",
+          priceTitle: "적용 시세 (월별)",
+          hint: "월 마감 전 · 정산 전 산정 · 막대 클릭→일별",
+          drill: "day",
+        };
+      }
+      const labels = [], bars = [];
+      for (let m = 1; m <= 12; m++) {
+        labels.push(m + "월");
+        bars.push(Math.round(5500000 + Math.sin(m / 2) * 1500000 + rnd() * 500000));
+      }
+      const gen = 412500;
+      const smp = 45200000, rec = 34650000;
+      return {
+        labels, bars,
+        kpis: [
+          { lab: "선택년 발전량", val: (gen / 1000).toLocaleString("ko-KR") + " MWh", sub: "월별 합산", cls: "g" },
+          { lab: "SMP 연 누적 수익", val: won(smp), sub: "월별 SMP수익 합산", cls: "g" },
+          { lab: "REC 연 누적 수익", val: won(rec), sub: "월별 REC수익 합산", cls: "o" },
+          { lab: "합산 연 누적 수익", val: won(smp + rec), sub: "SMP + REC", cls: "b" },
+        ],
+        price: [
+          ["SMP 산정방식", "월별 수익 합산"],
+          ["연 가중평균 SMP", "109.6 원/kWh"],
+          ["REC 연평균 단가", "68,000 원/REC"],
+          ["REC 가중치", "1.20"],
+          ["데이터", "월 마감 저장값 합산"],
+        ],
+        chartTitle: "월별 산정 수익 (원)",
+        priceTitle: "적용 시세 (연별)",
+        hint: "연도 피커 · 막대 클릭→해당 월별",
+        drill: "month",
+      };
+    }
+
+    function renderP35Bars(data) {
+      const el = document.getElementById("p35Chart");
+      const w = Math.max(320, el.clientWidth || 600);
+      const h = 220;
+      const pad = { l: 48, r: 12, t: 16, b: 28 };
+      const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+      const max = Math.max(...data.bars, 1);
+      const n = data.bars.length;
+      const gap = 2;
+      const bw = Math.max(3, iw / n - gap);
+      let svg = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`;
+      for (let g = 0; g <= 3; g++) {
+        const y = pad.t + (ih * g) / 3;
+        svg += `<line x1="${pad.l}" y1="${y}" x2="${w - pad.r}" y2="${y}" stroke="#2a2a2a" stroke-dasharray="3 4"/>`;
+        const lv = max - (max * g) / 3;
+        svg += `<text x="${pad.l - 6}" y="${y + 4}" fill="#777" font-size="10" text-anchor="end">${Math.round(lv / 1000)}k</text>`;
+      }
+      data.bars.forEach((v, i) => {
+        const x = pad.l + i * (iw / n) + gap / 2;
+        const bh = (v / max) * ih;
+        const y = pad.t + ih - bh;
+        svg += `<rect class="p35bar" data-i="${i}" x="${x}" y="${y}" width="${bw}" height="${bh}" fill="#2ecc71" rx="2" style="cursor:pointer"/>`;
+      });
+      const step = Math.max(1, Math.floor(n / 8));
+      for (let i = 0; i < n; i += step) {
+        const x = pad.l + i * (iw / n) + bw / 2;
+        svg += `<text x="${x}" y="${h - 8}" fill="#777" font-size="10" text-anchor="middle">${data.labels[i]}</text>`;
+      }
+      svg += `</svg>`;
+      el.innerHTML = svg;
+      el.querySelectorAll(".p35bar").forEach(rect => {
+        const i = +rect.dataset.i;
+        rect.addEventListener("mousemove", e => {
+          showTip(`<div class="t">${data.labels[i]}</div>
+            <div class="r"><span>산정 수익</span><span>${won(data.bars[i])}</span></div>`, e.clientX, e.clientY);
+        });
+        rect.addEventListener("mouseleave", hideTip);
+        rect.addEventListener("click", () => {
+          hideTip();
+          if (data.drill === "day") {
+            p35.period = "day";
+            p35.date = new Date(p35.date.getFullYear(), p35.date.getMonth(), i + 1);
+            refreshP35();
+          } else if (data.drill === "month") {
+            p35.period = "month";
+            p35.date = new Date(p35.date.getFullYear(), i, 1);
+            refreshP35();
+          } else {
+            openModal(`WDGT0035 · ${data.labels[i]}`, `
+              <table><tr><th>항목</th><th>값</th></tr>
+              <tr><td>산정 수익</td><td><b>${won(data.bars[i])}</b></td></tr>
+              <tr><td>기간</td><td>${data.labels[i]}</td></tr></table>
+              <p style="color:#888;font-size:12px">가라 데이터 · SMP×ΔkWh + REC 산정</p>`);
+          }
+        });
+      });
+    }
+
+    function refreshP35() {
+      const data = buildP35(p35.period, p35.date);
+      document.querySelectorAll("#p35Toolbar [data-period]").forEach(b => {
+        b.classList.toggle("on", b.dataset.period === p35.period);
+      });
+      const box = document.getElementById("p35DateBox");
+      if (p35.period === "day") box.textContent = fmtDay(p35.date);
+      else if (p35.period === "month") box.textContent = fmtMonth(p35.date);
+      else box.textContent = fmtYear(p35.date);
+      document.getElementById("p35Hint").textContent = data.hint;
+      document.getElementById("p35ChartTitle").textContent = data.chartTitle;
+      document.getElementById("p35PriceTitle").textContent = data.priceTitle;
+      document.getElementById("p35Kpis").innerHTML = data.kpis.map(k => `
+        <div class="profit-kpi">
+          <div class="lab">${k.lab}</div>
+          <div class="val ${k.cls}">${k.val}</div>
+          <div class="sub">${k.sub}</div>
+        </div>`).join("");
+      document.getElementById("p35Price").innerHTML = data.price.map(([k, v]) => `
+        <div class="row2"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+      renderP35Bars(data);
+    }
+
+    document.getElementById("p35Toolbar").addEventListener("click", e => {
+      const t = e.target;
+      if (t.dataset.period) { p35.period = t.dataset.period; refreshP35(); }
+      else if (t.dataset.nav) {
+        if (t.dataset.nav === "today") p35.date = new Date(2026, 8, 8);
+        else p35.date = addPeriod(p35.date, p35.period, +t.dataset.nav);
+        refreshP35();
+      }
+    });
+    new ResizeObserver(() => refreshP35()).observe(document.getElementById("p35Chart"));
+    refreshP35();
 
     // ---------- gen charts (인버터 6호기 선택) ----------
     function buildInvDaySeries(kind) {
