@@ -141,24 +141,56 @@
     .chart-legend { display: flex; gap: 14px; justify-content: flex-end; font-size: 12px; color: var(--dim); margin-top: 6px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
 
+    /* WDGT0040 — 설계서 v2.5 아코디언 */
     .acc-wrap { padding: 12px 14px 16px; }
-    .acc-item { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; background: #191919; overflow: hidden; }
-    .acc-sum { display: grid; grid-template-columns: 28px 1fr auto auto; gap: 10px; align-items: center; padding: 14px 16px; cursor: pointer; }
-    .acc-sum:hover { background: #1f1f1f; }
-    .acc-name { font-size: 14px; font-weight: 700; }
-    .acc-kw { font-size: 15px; font-weight: 700; }
-    .acc-hint { padding: 0 16px 12px 54px; font-size: 12px; color: var(--dim); }
-    .acc-body { display: none; border-top: 1px solid var(--line); padding: 8px 12px 12px; background: #151515; }
+    .acc-item {
+      position: relative; border: 1px solid #333841; border-radius: 10px; margin-bottom: 10px;
+      background: #242731; overflow: hidden;
+    }
+    .acc-item::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      background: #2ecc71;
+    }
+    .acc-item.is-warn::before { background: var(--orange); }
+    .acc-item.is-low::before { background: var(--yellow); }
+    .acc-sum {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      padding: 14px 16px 14px 18px; cursor: pointer;
+    }
+    .acc-sum:hover { background: rgba(255,255,255,.03); }
+    .acc-check {
+      width: 15px; height: 15px; border: 1.5px solid #8a8a8a; border-radius: 3px;
+      flex-shrink: 0; background: transparent;
+    }
+    .acc-name { font-size: 14px; font-weight: 700; min-width: 70px; }
+    .acc-kw { font-size: 14px; color: #ddd; margin-right: auto; }
+    .acc-kw .num { color: #5ec8e8; font-weight: 700; }
+    .acc-msg { font-size: 13px; color: #c5c5c5; }
+    .acc-body { display: none; border-top: 1px solid #333841; padding: 4px 12px 10px 18px; background: #1a1c23; }
     .acc-item.open .acc-body { display: block; }
-    .chev::before { content: "▶"; color: var(--dim); font-size: 12px; }
-    .acc-item.open .chev::before { content: "▼"; }
-    .ch-row { display: grid; grid-template-columns: 70px 1fr 1fr 1fr auto; gap: 8px; align-items: center; padding: 10px 8px; border-bottom: 1px solid #222; font-size: 13px; }
-    .ch-row.head { color: var(--dim); font-weight: 600; font-size: 12px; }
-    .ch-row.flash { outline: 2px solid #5dade2; background: rgba(93,173,226,.08); }
+    .ch-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ch-table th {
+      color: var(--dim); font-weight: 600; text-align: left; padding: 10px 8px;
+      border-bottom: 1px solid #333841; font-size: 12px; white-space: nowrap;
+    }
+    .ch-table td { padding: 11px 8px; border-bottom: 1px solid #2a2d36; vertical-align: middle; }
+    .ch-table tr.flash td { outline: 2px solid #5dade2; background: rgba(93,173,226,.08); }
+    .ch-table .val { color: #5ec8e8; font-weight: 600; }
+    .ch-table .val.warn { color: var(--orange); }
+    .ch-table .unit { color: #8a8a8a; font-weight: 400; margin-left: 3px; }
+    .ch-guide { color: #bdbdbd; font-size: 12px; line-height: 1.4; }
+    .ch-guide.warn { color: var(--orange); }
+    .time-pill {
+      background: #2a2d36; border-radius: 999px; padding: 6px 14px;
+      font-size: 12px; color: #b0b0b0; white-space: nowrap;
+    }
 
-    .hm41-shell { display: grid; grid-template-columns: 1fr 280px; min-height: 420px; }
+    /* WDGT0041 — 설계서 v2.5 */
+    .hm41-shell { display: grid; grid-template-columns: 1fr 300px; min-height: 420px; }
     .hm41-main { padding: 12px 16px 16px; border-right: 1px solid var(--line); min-width: 0; }
     .hm41-side { padding: 16px; background: #171717; }
+    .hm41-side .count-note { font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.45; }
+    .hm41-toolbar { display: flex; gap: 8px; align-items: center; padding: 10px 16px 0; flex-wrap: wrap; }
     .hm-grid { display: grid; gap: 3px; margin-bottom: 10px; }
     .hm-lab { font-size: 12px; color: var(--dim); display: flex; align-items: center; }
     .hm-cell { height: 26px; border-radius: 3px; background: var(--green); cursor: pointer; }
@@ -173,6 +205,9 @@
       appearance: auto; cursor: pointer;
     }
     .select-inv:focus { outline: 1px solid var(--accent); }
+    .select-inv.active {
+      border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent);
+    }
     .inv-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .inv-chip {
       border: 1px solid var(--line); background: #222; color: var(--dim);
@@ -261,10 +296,10 @@
 <body>
   <div class="page">
     <div class="spec-banner">
-      <h1>태양광 대시보드 배치 목업 — 문서 기능 전체 구현 <span style="color:#8ad4ff;font-size:14px">· build 2026-09-08c (WDGT0035 포함)</span></h1>
+      <h1>태양광 대시보드 배치 목업 — 문서 기능 전체 구현 <span style="color:#8ad4ff;font-size:14px">· build 2026-09-14a (WDGT0040·0041 설계서 정합)</span></h1>
       <p>
         PNG 없음 · 더미 데이터. <strong>WDGT0035</strong> SMP·REC 누적 산정 수익(일/월/연) 포함.
-        0036~0041 성능·채널 · 0041 일/월 · 보류(0042~44)·장애·국소선택바 제외.
+        0036~0041 성능·채널 · <strong>0040·0041 = 위젯 설계서 v2.5 화면 정합</strong> · 보류(0042~44)·장애·국소선택바 제외.
       </p>
     </div>
 
@@ -489,32 +524,27 @@
 
     <!-- 6 -->
     <section class="section">
-      <div class="section-head"><h3>7. PV 채널 현황 · 상태 이력 <span class="pill pill-p">PPT</span></h3><span class="hint">0040 아코디언 · 0041 일/월·필터·드릴다운</span></div>
+      <div class="section-head"><h3>7. PV 채널 현황 · 상태 이력 <span class="pill pill-p">PPT</span></h3><span class="hint">0040·0041 = 설계서 v2.5</span></div>
 
       <div class="widget" style="margin-bottom:var(--gap)" id="wdgt0040">
         <div class="size-tag"><span class="id">WDGT0040</span> · W 100%</div>
-        <div class="w-head"><div class="w-title">인버터 PV 채널 별 발전 현황</div><div class="w-sub">합계 kW로 판정하지 않음 · DEV% 기준</div></div>
+        <div class="w-head">
+          <div class="w-title">인버터 PV 채널 별 발전 현황</div>
+          <div class="time-pill">2026.07.29 14:15 기준</div>
+        </div>
         <div class="acc-wrap" id="accRoot"></div>
       </div>
 
       <div class="widget" id="wdgt0041">
         <div class="size-tag"><span class="id">WDGT0041</span> · W 100% · 연별 없음</div>
-        <div class="w-head"><div class="w-title">인버터·채널 상태 추이</div><div class="w-sub">히트맵/캘린더 + 건수 · 필터 유지</div></div>
-        <div class="toolbar" id="hmToolbar">
-          <button class="tab on" data-period="day">일별</button>
-          <button class="tab" data-period="month">월별</button>
-          <div class="date-nav">
-            <button type="button" data-nav="-1">‹</button>
-            <div class="date-box" id="hmDateBox">2026. 09. 08 (화)</div>
-            <button type="button" data-nav="1">›</button>
-            <button type="button" class="tab" data-nav="today">오늘</button>
-          </div>
+        <div class="w-head">
+          <div class="w-title">인버터·채널 상태 추이</div>
         </div>
-        <!-- 일별: 인버터 요약 | 채널 상세 + (채널상세일 때) 인버터 드롭다운 -->
-        <div class="toolbar" id="hmDayBar" style="padding-top:8px">
-          <button class="tab on" data-mode="inv">인버터 요약</button>
-          <button class="tab" data-mode="ch">채널 상세</button>
-          <select class="select-inv" id="hmDayInvSelect" style="display:none;margin-left:8px" aria-label="인버터 선택">
+        <!-- 설계서: 좌=요약/채널상세+드롭다운 · 우=일/월+날짜 -->
+        <div class="hm41-toolbar" id="hmToolbar">
+          <button type="button" class="tab" data-mode="inv">인버터 요약</button>
+          <button type="button" class="tab on" data-mode="ch">채널 상세</button>
+          <select class="select-inv active" id="hmDayInvSelect" aria-label="인버터 선택">
             <option value="1">인버터 1</option>
             <option value="2" selected>인버터 2</option>
             <option value="3">인버터 3</option>
@@ -522,12 +552,8 @@
             <option value="5">인버터 5</option>
             <option value="6">인버터 6</option>
           </select>
-          <span class="hint-inline" id="hmDayHint">범위: 사이트 전체 6대 · 행 클릭→채널 상세</span>
-        </div>
-        <!-- 월별: 사이트 전체 | 인버터 드롭다운 -->
-        <div class="toolbar" id="hmMonthBar" style="padding-top:8px;display:none">
-          <button class="tab on" data-scope="site">사이트 전체</button>
-          <select class="select-inv" id="hmMonthInvSelect" aria-label="인버터 필터">
+          <button type="button" class="tab" data-scope="site" id="hmSiteBtn" style="display:none">사이트 전체</button>
+          <select class="select-inv" id="hmMonthInvSelect" style="display:none" aria-label="인버터 필터">
             <option value="1">인버터 1</option>
             <option value="2">인버터 2</option>
             <option value="3">인버터 3</option>
@@ -535,7 +561,13 @@
             <option value="5">인버터 5</option>
             <option value="6">인버터 6</option>
           </select>
-          <span class="hint-inline">필터: 사이트 전체 ↔ 드롭다운으로 인버터 1~6 · 일별 이동 시 유지</span>
+          <div class="date-nav">
+            <button type="button" class="tab on" data-period="day">일별</button>
+            <button type="button" class="tab" data-period="month">월별</button>
+            <button type="button" data-nav="-1" aria-label="이전">‹</button>
+            <div class="date-box" id="hmDateBox">2026. 07. 29 (수)</div>
+            <button type="button" data-nav="1" aria-label="다음">›</button>
+          </div>
         </div>
         <div class="hm41-shell">
           <div class="hm41-main">
@@ -543,7 +575,7 @@
             <div class="w-sub" id="hmMainSub" style="margin-bottom:10px"></div>
             <div id="hmVisual"></div>
             <div class="legend-row" style="padding-left:0">
-              <span><i class="sq" style="background:#3a3a3a"></i>계산 안 함</span>
+              <span><i class="sq" style="background:#3a3a3a"></i>계산안함</span>
               <span><i class="sq" style="background:var(--green)"></i>정상</span>
               <span><i class="sq" style="background:var(--yellow)"></i>낮음</span>
               <span><i class="sq" style="background:var(--orange)"></i>점검 권장</span>
@@ -551,15 +583,16 @@
           </div>
           <aside class="hm41-side">
             <h4 id="hmCountTitle" style="margin:0 0 4px;font-size:14px">당일 상태 건수</h4>
-            <div class="w-sub" id="hmCountSub">범위: 사이트 전체</div>
+            <div class="w-sub" id="hmCountSub">범위: 인버터 2만 (8채널 × 15분)</div>
             <div class="count-bars" id="hmCountBars"></div>
+            <div class="count-note" id="hmCountNote">채널 상세에서 막대는 선택한 인버터만 집계</div>
           </aside>
         </div>
       </div>
     </section>
 
     <div class="footer-note">
-      문서(PPT v2.3 베이스 + v2.5 0041) 기준 인터랙션 목업.
+      문서(태양광 위젯 설계서 덕우전자 v2.5) 기준 인터랙션 목업 · WDGT0040·0041 화면 정합.
       파일: <code>Rwork/solar-dashboard-layout/index.html</code>
     </div>
   </div>
@@ -578,13 +611,18 @@
     const WEEK = ["일","월","화","수","목","금","토"];
     const INV_COLORS = ["#f39c12","#56aaeb","#9b59b6","#2ecc71","#e74c3c","#f1c40f"];
     const ST_COLOR = { ok:"#2ecc71", low:"#f1c40f", warn:"#e67e22", check:"#3498db", none:"#555" };
-    const ST_LABEL = { ok:"정상", low:"낮음", warn:"점검권장", check:"확인중", none:"계산안함" };
+    const ST_LABEL = { ok:"정상", low:"낮음", warn:"점검 권장", check:"확인중", none:"계산안함" };
     const ST_MSG = {
-      ok: "채널 출력이 인버터 평균과 비슷한 수준이에요.",
+      ok: "다른 채널과 비슷해요",
       low: "출력이 평균보다 낮아요. 음영·오염을 확인해 보세요.",
-      warn: "전류가 거의 없어요. 배선·퓨즈·접속을 확인해 보세요.",
+      warn: "전류가 거의 없어요. 배선 퓨즈 접속을 확인해 보세요.",
       none: "일사·유효 데이터 부족으로 계산하지 않았어요.",
       check: "값이 비정상 범위예요. 계측을 확인해 주세요."
+    };
+    const INV_MSG = {
+      ok: "채널들이 고르게 돌아가고 있어요",
+      low: "일부 채널 출력이 낮아요",
+      warn: "일부 채널을 확인해 보세요"
     };
     const INV_EFF = [
       { name:"인버터 1", pct:97.6, st:"정상", stClass:"st-ok" },
@@ -1401,55 +1439,101 @@
     mountMeter(document.getElementById("chartGenMonth"), "이번달 발전량", meterMonth, "kWh", "#9b59b6");
     mountMeter(document.getElementById("chartGenYear"), "해당년 발전량", meterYear, "MWh", "#888888");
 
-    // ---------- 0040 ----------
-    const channelsDemo = [
-      { v:612.4, i:8.2, p:5.0, st:"정상", cls:"st-ok", key:"ok" },
-      { v:608.1, i:8.0, p:4.9, st:"정상", cls:"st-ok", key:"ok" },
-      { v:590.0, i:2.1, p:1.2, st:"점검권장", cls:"st-warn", key:"warn" },
-      { v:611.2, i:7.9, p:4.8, st:"정상", cls:"st-ok", key:"ok" },
-      { v:605.5, i:7.6, p:4.6, st:"낮음", cls:"st-low", key:"low" },
-      { v:609.8, i:8.1, p:4.9, st:"정상", cls:"st-ok", key:"ok" },
-      { v:610.3, i:8.0, p:4.9, st:"정상", cls:"st-ok", key:"ok" },
-      { v:607.0, i:7.8, p:4.7, st:"정상", cls:"st-ok", key:"ok" },
-    ];
-    const invAcc = [
-      { id:1, name:"인버터 1", kw:42.8, st:"점검권장", cls:"st-warn", open:true },
-      { id:2, name:"인버터 2", kw:48.1, st:"정상", cls:"st-ok" },
-      { id:3, name:"인버터 3", kw:45.6, st:"낮음", cls:"st-low" },
-      { id:4, name:"인버터 4", kw:47.2, st:"정상", cls:"st-ok" },
-      { id:5, name:"인버터 5", kw:46.0, st:"정상", cls:"st-ok" },
-      { id:6, name:"인버터 6", kw:44.4, st:"정상", cls:"st-ok" },
-    ];
+    // ---------- 0040 (설계서 v2.5) ----------
+    // 상단 요약 안내 삭제 · 인버터·채널 모두 상태뱃지 + 안내문구
+    // 좌측 상태바 · 체크박스 · 합계(cyan) · 뱃지 · 안내 · 펼침 시 채널 표(+안내 컬럼)
+    function channelsForInv(invId) {
+      const base = [
+        { v: 610, i: 8.3, p: 5.06, key: "ok" },
+        { v: 608, i: 8.1, p: 4.93, key: "ok" },
+        { v: 612, i: 8.4, p: 5.14, key: "ok" },
+        { v: 611, i: 8.2, p: 5.01, key: "ok" },
+        { v: 609, i: 8.0, p: 4.87, key: "ok" },
+        { v: 610, i: 8.3, p: 5.06, key: "ok" },
+        { v: 607, i: 7.9, p: 4.80, key: "ok" },
+        { v: 611, i: 8.1, p: 4.95, key: "ok" },
+      ];
+      if (invId === 2) {
+        base[3] = { v: 605, i: 0.2, p: 0.12, key: "warn" };
+      } else if (invId === 3) {
+        base[4] = { v: 602, i: 4.1, p: 2.47, key: "low" };
+      } else if (invId === 1) {
+        // all ok — design sample
+      }
+      return base.map(c => ({
+        ...c,
+        st: ST_LABEL[c.key],
+        cls: c.key === "ok" ? "st-ok" : c.key === "low" ? "st-low" : "st-warn",
+        guide: ST_MSG[c.key],
+      }));
+    }
+    function invRollup(chs) {
+      let key = "ok";
+      chs.forEach(c => {
+        if (c.key === "warn") key = "warn";
+        else if (c.key === "low" && key !== "warn") key = "low";
+      });
+      const kw = chs.reduce((s, c) => s + c.p, 0);
+      return { key, kw: Math.round(kw * 10) / 10, st: ST_LABEL[key], cls: key === "ok" ? "st-ok" : key === "low" ? "st-low" : "st-warn", msg: INV_MSG[key] };
+    }
+    const invAcc = [1, 2, 3, 4, 5, 6].map(id => {
+      const chs = channelsForInv(id);
+      const roll = invRollup(chs);
+      return { id, name: `인버터 ${id}`, chs, ...roll, open: id === 2 };
+    });
+    // 설계서 샘플 수치 보정 (INV1 합계 표기)
+    invAcc[0].kw = 38.2;
+    invAcc[1].kw = 35.1;
+    invAcc[2].kw = 36.4;
+    invAcc[3].kw = 37.8;
+    invAcc[4].kw = 38.0;
+    invAcc[5].kw = 37.2;
+
     const accRoot = document.getElementById("accRoot");
     invAcc.forEach(inv => {
       const item = document.createElement("div");
-      item.className = "acc-item" + (inv.open ? " open" : "");
+      item.className = "acc-item" + (inv.open ? " open" : "") + (inv.key === "warn" ? " is-warn" : inv.key === "low" ? " is-low" : "");
       item.id = `acc-inv-${inv.id}`;
       item.innerHTML = `
-        <div class="acc-sum"><span class="chev"></span><span class="acc-name">${inv.name}</span>
-          <span class="acc-kw">합계 ${inv.kw} kW</span><span class="st ${inv.cls}">${inv.st}</span></div>
-        <div class="acc-hint">채널 편차 심각도 최심값으로 인버터 뱃지 산정 · 합계 kW 미사용</div>
+        <div class="acc-sum">
+          <span class="acc-check" aria-hidden="true"></span>
+          <span class="acc-name">${inv.name}</span>
+          <span class="acc-kw">합계 <span class="num">${inv.kw.toFixed(1)}</span> kW</span>
+          <span class="st ${inv.cls}">${inv.st}</span>
+          <span class="acc-msg">${inv.msg}</span>
+        </div>
         <div class="acc-body">
-          <div class="ch-row head"><span>채널</span><span>전압 V</span><span>전류 I</span><span>전력 P</span><span>상태</span></div>
-          ${channelsDemo.map((c,i)=>`
-            <div class="ch-row" data-ch="${i+1}" id="ch-${inv.id}-${i+1}">
-              <span>CH${i+1}</span><span>${c.v} V</span><span>${c.i} A</span><span>${(c.p+(inv.id===2?0.4:0)).toFixed(1)} kW</span>
-              <span class="st ${inv.id===2 && i!==2 && i!==4 ? "st-ok" : c.cls}">${inv.id===2 && i!==2 && i!==4 ? "정상" : c.st}</span>
-            </div>`).join("")}
+          <table class="ch-table">
+            <thead>
+              <tr>
+                <th>채널</th><th>전압 V</th><th>전류 A</th><th>출력 kW</th><th>상태</th><th>안내</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${inv.chs.map((c, i) => `
+                <tr data-ch="${i + 1}" id="ch-${inv.id}-${i + 1}" style="cursor:pointer">
+                  <td>채널 ${i + 1}</td>
+                  <td><span class="val">${c.v}</span><span class="unit">V</span></td>
+                  <td><span class="val${c.key === "warn" ? " warn" : ""}">${c.i}</span><span class="unit">A</span></td>
+                  <td><span class="val${c.key === "warn" ? " warn" : ""}">${c.p.toFixed(2)}</span><span class="unit">kW</span></td>
+                  <td><span class="st ${c.cls}">${c.st}</span></td>
+                  <td><span class="ch-guide${c.key === "warn" || c.key === "low" ? " warn" : ""}">${c.guide}</span></td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
         </div>`;
       item.querySelector(".acc-sum").onclick = () => item.classList.toggle("open");
-      item.querySelectorAll(".ch-row[data-ch]").forEach(row => {
-        row.style.cursor = "pointer";
+      item.querySelectorAll("tr[data-ch]").forEach(row => {
         row.onclick = () => {
           const ch = +row.dataset.ch;
-          const c = channelsDemo[ch-1];
-          openModal(`${inv.name} · CH${ch} 상세`, `
+          const c = inv.chs[ch - 1];
+          openModal(`${inv.name} · 채널 ${ch} 상세`, `
             <table><tr><th>항목</th><th>값</th></tr>
-            <tr><td>전압 V</td><td>${c.v} V</td></tr>
-            <tr><td>전류 I</td><td>${c.i} A</td></tr>
-            <tr><td>전력 P</td><td>${c.p} kW (=V×I)</td></tr>
+            <tr><td>전압</td><td>${c.v} V</td></tr>
+            <tr><td>전류</td><td>${c.i} A</td></tr>
+            <tr><td>출력</td><td>${c.p.toFixed(2)} kW</td></tr>
             <tr><td>상태</td><td>${c.st}</td></tr>
-            <tr><td>안내</td><td>${ST_MSG[c.key]}</td></tr></table>`);
+            <tr><td>안내</td><td>${c.guide}</td></tr></table>`);
         };
       });
       accRoot.appendChild(item);
@@ -1464,22 +1548,21 @@
       setTimeout(() => {
         const row = document.getElementById(`ch-${invId}-${ch}`);
         if (!row) return;
-        document.querySelectorAll(".ch-row.flash").forEach(r => r.classList.remove("flash"));
+        document.querySelectorAll(".ch-table tr.flash").forEach(r => r.classList.remove("flash"));
         row.classList.add("flash");
         row.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 350);
     }
 
     // ---------- 0041 (설계서 v2.5) ----------
-    // 일별: 인버터 요약(6행) | 채널 상세(드롭다운으로 INV 선택, CH8행)
-    // 월별: 사이트 전체 | 인버터 드롭다운 (1~6)
-    // 채널상세에서 고른 INV는 월별 필터로 유지
+    // 일별: 인버터 요약(6행) | 채널 상세(드롭다운 INV 선택, CH8행)
+    // 월별: 사이트 전체 | 인버터 드롭다운 · 채널상세 필터 유지
     const hmState = {
       period: "day",
-      mode: "inv",       // day only: inv | ch
-      filter: "site",     // site | inv  (월별·채널상세 연동)
+      mode: "ch",
+      filter: "inv",
       invId: 2,
-      date: new Date(2026, 8, 8),
+      date: new Date(2026, 6, 29),
     };
 
     function hmSlots() { return dayLabels15().length; }
@@ -1515,28 +1598,22 @@
       const n = hmSlots();
       const counts = { ok: 0, low: 0, warn: 0, none: 0 };
       if (mode === "inv" && scopeInv == null) {
-        // 설계: 인버터 요약 막대 = 사이트 전체(6×8×15분 합산)
         for (let inv = 1; inv <= 6; inv++)
           for (let ch = 1; ch <= 8; ch++)
-            for (let t = 0; t < n; t++) {
-              const s = statusAt(inv, ch, t);
-              counts[s]++;
-            }
+            for (let t = 0; t < n; t++) counts[statusAt(inv, ch, t)]++;
       } else {
         const inv = scopeInv || hmState.invId;
         for (let ch = 1; ch <= 8; ch++)
-          for (let t = 0; t < n; t++) {
-            const s = statusAt(inv, ch, t);
-            counts[s]++;
-          }
+          for (let t = 0; t < n; t++) counts[statusAt(inv, ch, t)]++;
       }
       return counts;
     }
 
-    function renderCountBars(counts, sub) {
+    function renderCountBars(counts, sub, note) {
       document.getElementById("hmCountSub").textContent = sub;
       document.getElementById("hmCountTitle").textContent =
         hmState.period === "month" ? "이번 달 상태 건수" : "당일 상태 건수";
+      document.getElementById("hmCountNote").textContent = note || "";
       const max = Math.max(counts.ok || 0, counts.low || 0, counts.warn || 0, counts.none || 0, 1);
       const items = [
         ["정상", ST_COLOR.ok, counts.ok || 0],
@@ -1552,21 +1629,6 @@
         </div>`).join("");
     }
 
-    function syncDayInvSelect() {
-      const sel = document.getElementById("hmDayInvSelect");
-      sel.value = String(hmState.invId);
-    }
-    function syncMonthInvSelect() {
-      const sel = document.getElementById("hmMonthInvSelect");
-      sel.value = String(hmState.invId);
-      document.querySelectorAll("#hmMonthBar [data-scope]").forEach(b => {
-        b.classList.toggle("on", hmState.filter === "site");
-      });
-      // 인버터 필터일 때 드롭다운 강조
-      sel.style.borderColor = hmState.filter === "inv" ? "#0e6e7a" : "";
-      sel.style.boxShadow = hmState.filter === "inv" ? "0 0 0 1px #0e6e7a" : "";
-    }
-
     function renderHeatmap() {
       const visual = document.getElementById("hmVisual");
       const n = hmSlots();
@@ -1577,7 +1639,7 @@
         document.getElementById("hmMainTitle").textContent =
           `월 캘린더 · ${scopeInv ? "인버터 " + scopeInv + "만" : "사이트 전체"}`;
         document.getElementById("hmMainSub").textContent =
-          "날짜 칸 = 그날 최심 상태 라벨(네모+글씨) · 클릭→일별(필터 유지)";
+          "날짜 칸 = 그날 최심 상태 · 클릭 시 일별로 이동(필터 유지)";
         const y = hmState.date.getFullYear(), m = hmState.date.getMonth();
         const firstDow = new Date(y, m, 1).getDay();
         const dim = daysInMonth(y, m);
@@ -1606,35 +1668,34 @@
             const day = +cell.dataset.day;
             const st = monthDayStatus(day, scopeInv);
             showTip(`<div class="t">${y}.${m + 1}.${day}</div>
-              <div class="r"><span>최심 상태</span><span>${ST_LABEL[st]}</span></div>
-              <div class="r"><span>클릭</span><span>일별로 이동</span></div>`, e.clientX, e.clientY);
+              <div class="r"><span>최심 상태</span><span style="color:${ST_COLOR[st]}">${ST_LABEL[st]}</span></div>`, e.clientX, e.clientY);
           };
           cell.onmouseleave = hideTip;
         });
         renderCountBars(
           countStatuses(scopeInv, "month"),
-          `범위: ${scopeInv ? "인버터 " + scopeInv + "만" : "사이트 전체"}`
+          `범위: ${scopeInv ? "인버터 " + scopeInv + "만" : "사이트 전체"}`,
+          scopeInv ? "인버터 필터 선택 시 해당 호기만 집계" : "사이트 전체 집계"
         );
         return;
       }
 
-      // ---- 일별 ----
       let rowLabels = [];
       if (hmState.mode === "inv") {
         document.getElementById("hmMainTitle").textContent = "상태 히트맵 (인버터 × 15분)";
-        document.getElementById("hmMainSub").textContent = "칸 호버=롤업+채널 건수 · 행/칸 클릭→채널 상세";
+        document.getElementById("hmMainSub").textContent = "칸 호버=롤업 상태 · 행/칸 클릭→채널 상세";
         for (let inv = 1; inv <= 6; inv++) rowLabels.push({ type: "inv", inv, label: "INV" + inv });
       } else {
         const inv = hmState.invId;
         document.getElementById("hmMainTitle").textContent = `상태 히트맵 (INV${inv} · 채널 × 15분)`;
-        document.getElementById("hmMainSub").textContent = "칸 호버=상태+안내 · 클릭→0040 V/I/P · 드롭다운으로 INV1~6 선택";
+        document.getElementById("hmMainSub").textContent = "칸 호버=상태+안내 · 클릭→0040 채널 V/I/P";
         for (let ch = 1; ch <= 8; ch++) rowLabels.push({ type: "ch", inv, ch, label: "CH" + ch });
       }
 
       visual.innerHTML = "";
       const grid = document.createElement("div");
       grid.className = "hm-grid";
-      grid.style.gridTemplateColumns = `64px repeat(${n}, 1fr)`;
+      grid.style.gridTemplateColumns = `48px repeat(${n}, 1fr)`;
 
       rowLabels.forEach(row => {
         const lab = document.createElement("div");
@@ -1666,12 +1727,14 @@
               const cnt = { ok: 0, low: 0, warn: 0, none: 0 };
               for (let ch = 1; ch <= 8; ch++) cnt[statusAt(row.inv, ch, t)]++;
               showTip(`<div class="t">${row.label} · ${timeLab}~${next}</div>
-                <div class="r"><span>인버터 상태</span><span>${ST_LABEL[st]}</span></div>
-                <div class="r"><span>채널 내역</span><span>점검 ${cnt.warn} · 낮음 ${cnt.low} · 정상 ${cnt.ok}</span></div>`, e.clientX, e.clientY);
+                <div class="r"><span>상태</span><span style="color:${ST_COLOR[st]}">${ST_LABEL[st]}</span></div>
+                <div class="r"><span>채널</span><span>점검 ${cnt.warn} · 낮음 ${cnt.low} · 정상 ${cnt.ok}</span></div>`, e.clientX, e.clientY);
             } else {
+              const tipMsg = ST_MSG[st].split(". ");
               showTip(`<div class="t">CH${row.ch} · ${timeLab}~${next}</div>
-                <div class="r"><span>상태</span><span>${ST_LABEL[st]}</span></div>
-                <div class="r"><span>안내</span><span>${ST_MSG[st]}</span></div>`, e.clientX, e.clientY);
+                <div class="r"><span>상태</span><span style="color:${ST_COLOR[st]}">${ST_LABEL[st]}</span></div>
+                <div style="margin-top:4px;color:#ccc">${tipMsg[0]}</div>
+                ${tipMsg[1] ? `<div style="color:#ccc">${tipMsg[1]}</div>` : ""}`, e.clientX, e.clientY);
             }
           };
           cell.onmouseleave = hideTip;
@@ -1691,7 +1754,7 @@
       visual.appendChild(grid);
 
       const xlab = document.createElement("div");
-      xlab.style.cssText = "display:grid;grid-template-columns:64px 1fr;margin-top:4px;font-size:11px;color:#777";
+      xlab.style.cssText = "display:grid;grid-template-columns:48px 1fr;margin-top:4px;font-size:11px;color:#777";
       const times = document.createElement("div");
       times.style.cssText = "display:flex;justify-content:space-between;padding:0 2px";
       ["06", "08", "10", "12", "14", "16", "18"].forEach(t => {
@@ -1702,11 +1765,16 @@
       visual.appendChild(xlab);
 
       if (hmState.mode === "inv") {
-        renderCountBars(countStatuses(null, "inv"), "범위: 사이트 전체 · 6인버터 × 8채널 × 15분");
+        renderCountBars(
+          countStatuses(null, "inv"),
+          "범위: 사이트 전체 · 6인버터 × 8채널 × 15분",
+          "인버터 요약에서는 사이트 전체를 집계"
+        );
       } else {
         renderCountBars(
           countStatuses(hmState.invId, "ch"),
-          `범위: 인버터 ${hmState.invId}만 · 8채널 × 15분`
+          `범위: 인버터 ${hmState.invId}만 (8채널 × 15분)`,
+          "채널 상세에서 막대는 선택한 인버터만 집계"
         );
       }
     }
@@ -1718,70 +1786,65 @@
       document.getElementById("hmDateBox").textContent =
         hmState.period === "day" ? fmtDay(hmState.date) : fmtMonth(hmState.date);
 
-      const dayBar = document.getElementById("hmDayBar");
-      const monthBar = document.getElementById("hmMonthBar");
+      const dayInv = document.getElementById("hmDayInvSelect");
+      const monthInv = document.getElementById("hmMonthInvSelect");
+      const siteBtn = document.getElementById("hmSiteBtn");
+      const modeBtns = document.querySelectorAll("#hmToolbar [data-mode]");
+
       if (hmState.period === "day") {
-        dayBar.style.display = "flex";
-        monthBar.style.display = "none";
-        document.querySelectorAll("#hmDayBar [data-mode]").forEach(b => {
+        modeBtns.forEach(b => {
+          b.style.display = "";
           b.classList.toggle("on", b.dataset.mode === hmState.mode);
         });
-        const invSelect = document.getElementById("hmDayInvSelect");
-        const hint = document.getElementById("hmDayHint");
+        siteBtn.style.display = "none";
+        monthInv.style.display = "none";
         if (hmState.mode === "ch") {
-          invSelect.style.display = "";
-          syncDayInvSelect();
-          hint.textContent = `채널 상세 · 드롭다운으로 인버터 선택 (현재 ${hmState.invId}호기) · 월별로 가도 유지`;
+          dayInv.style.display = "";
+          dayInv.value = String(hmState.invId);
+          dayInv.classList.add("active");
         } else {
-          invSelect.style.display = "none";
-          hint.textContent = "범위: 사이트 전체 6대 · 행 클릭→채널 상세";
+          dayInv.style.display = "none";
+          dayInv.classList.remove("active");
         }
       } else {
-        dayBar.style.display = "none";
-        monthBar.style.display = "flex";
-        syncMonthInvSelect();
+        modeBtns.forEach(b => { b.style.display = "none"; });
+        dayInv.style.display = "none";
+        siteBtn.style.display = "";
+        monthInv.style.display = "";
+        siteBtn.classList.toggle("on", hmState.filter === "site");
+        monthInv.value = String(hmState.invId);
+        monthInv.classList.toggle("active", hmState.filter === "inv");
       }
       renderHeatmap();
     }
 
     document.getElementById("hmToolbar").addEventListener("click", e => {
-      const t = e.target;
+      const t = e.target.closest("button");
+      if (!t) return;
       if (t.dataset.period) {
         hmState.period = t.dataset.period;
-        // 월별 진입: 채널상세였으면 인버터 필터 유지, 요약이었으면 사이트 전체
         if (hmState.period === "month") {
           if (hmState.mode === "ch") hmState.filter = "inv";
           else if (hmState.filter !== "inv") hmState.filter = "site";
         }
         refreshHm();
       } else if (t.dataset.nav) {
-        if (t.dataset.nav === "today") hmState.date = new Date(2026, 8, 8);
-        else hmState.date = addPeriod(hmState.date, hmState.period, +t.dataset.nav);
+        hmState.date = addPeriod(hmState.date, hmState.period, +t.dataset.nav);
+        refreshHm();
+      } else if (t.dataset.mode) {
+        hmState.mode = t.dataset.mode;
+        hmState.filter = hmState.mode === "inv" ? "site" : "inv";
+        refreshHm();
+      } else if (t.dataset.scope === "site") {
+        hmState.filter = "site";
         refreshHm();
       }
-    });
-    document.getElementById("hmDayBar").addEventListener("click", e => {
-      const t = e.target.closest("[data-mode]");
-      if (!t) return;
-      hmState.mode = t.dataset.mode;
-      if (hmState.mode === "inv") {
-        hmState.filter = "site";
-      } else {
-        hmState.filter = "inv";
-      }
-      refreshHm();
     });
     document.getElementById("hmDayInvSelect").addEventListener("change", e => {
       hmState.invId = +e.target.value;
       hmState.filter = "inv";
       hmState.mode = "ch";
       refreshHm();
-    });
-    document.getElementById("hmMonthBar").addEventListener("click", e => {
-      if (e.target.dataset.scope === "site") {
-        hmState.filter = "site";
-        refreshHm();
-      }
     });
     document.getElementById("hmMonthInvSelect").addEventListener("change", e => {
       hmState.filter = "inv";
