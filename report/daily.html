@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>[덕우전자]태양광발전설비 일간 리포트 · 2026-09-15</title>
+  <style>
+/* embedded report.css — self-contained (CSS 없어도 단독 열림) */
+/* 태양광 분석 리포트 (다현장) — A4 인쇄용 공통 스타일 · Mock 빌딩명 예시
+   @page A4 · 화면은 A4 미리보기, Ctrl+P 시 동일 비율로 출력 */
+
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+:root {
+  --hd: #1a2b4a;
+  --tx: #2d3138;
+  --dm: #78808c;
+  --ln: #dadfe8;
+  --bg: #f6f8fa;
+  --ok: #2e7d32;
+  --teal: #007a8c;
+  --low: #c4a014;
+  --ins: #de741e;
+  --chk: #3480c8;
+  --na: #a6acb6;
+  --money: #175c8e;
+  --red: #c0392b;
+  --white: #fff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 11pt; }
+
+body {
+  font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  color: var(--tx);
+  background: #e8ecf1;
+  line-height: 1.35;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* 화면용 툴바 — 인쇄 시 숨김 */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: var(--hd);
+  color: #fff;
+  font-size: 13px;
+}
+.toolbar a, .toolbar button {
+  color: #fff;
+  text-decoration: none;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+.toolbar a:hover, .toolbar button:hover { background: rgba(255,255,255,.22); }
+.toolbar .sep { opacity: .4; margin: 0 4px; }
+.toolbar .hint { opacity: .7; font-size: 12px; margin-left: auto; }
+
+.pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 0 40px;
+}
+
+/* A4 한 장 = 210 × 297 mm (화면은 최소 높이, 인쇄 시 페이지 단위) */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  background: var(--white);
+  box-shadow: 0 4px 24px rgba(26, 43, 74, .18);
+  padding: 7mm 8mm 6mm;
+  display: flex;
+  flex-direction: column;
+  page-break-after: always;
+  break-after: page;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.page:last-child {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+.page-head {
+  background: var(--hd);
+  color: #fff;
+  border-radius: 6px;
+  padding: 7px 12px 8px;
+  margin-bottom: 5mm;
+  flex-shrink: 0;
+}
+.page-head h1 {
+  font-size: 15pt;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.page-head .sub {
+  font-size: 8.5pt;
+  color: #bccada;
+  margin-top: 2px;
+}
+
+.page-foot {
+  margin-top: auto;
+  padding-top: 3mm;
+  font-size: 8pt;
+  color: var(--dm);
+  border-top: 1px solid var(--ln);
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.block {
+  border: 1px solid var(--ln);
+  border-radius: 6px;
+  padding: 2.6mm 3mm 2.4mm;
+  margin-bottom: 2.6mm;
+  flex-shrink: 0;
+}
+.block h2 {
+  font-size: 9.5pt;
+  color: var(--hd);
+  font-weight: 700;
+  margin-bottom: 2.5mm;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2mm 4mm;
+}
+.kpi .lab { font-size: 7.5pt; color: var(--dm); }
+.kpi .val {
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--tx);
+  line-height: 1.15;
+  margin-top: 1px;
+}
+.kpi .val.money { color: var(--money); }
+.kpi .val.ok { color: var(--ok); }
+.kpi .val.teal { color: var(--teal); }
+.kpi .val.ins { color: var(--ins); }
+.kpi .unit {
+  font-size: 8pt;
+  font-weight: 400;
+  color: var(--dm);
+  margin-left: 2px;
+}
+.kpi .sub { display: none; }
+
+.note { display: none; }
+.note.strong {
+  display: block;
+  font-size: 8pt;
+  color: var(--tx);
+  margin-top: 0;
+}
+.note.strong { color: var(--tx); }
+.rate-line {
+  font-size: 8pt;
+  color: var(--tx);
+  margin-top: 2mm;
+  padding-top: 2mm;
+  border-top: 1px solid #eef1f6;
+}
+.rate-line b { color: var(--hd); margin-right: 6px; }
+
+.badge {
+  display: inline-block;
+  font-size: 8pt;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+.badge.ok { background: var(--ok); }
+.badge.low { background: var(--low); }
+.badge.ins { background: var(--ins); }
+.badge.chk { background: var(--chk); }
+.badge.na { background: var(--na); }
+
+/* 상태 비중 바 */
+.status-bar {
+  display: flex;
+  height: 18px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 2.5mm;
+}
+.status-bar span { display: block; height: 100%; }
+.status-bar .ok { background: var(--ok); }
+.status-bar .low { background: var(--low); }
+.status-bar .ins { background: var(--ins); }
+.status-bar .chk { background: var(--chk); }
+.status-bar .na { background: var(--na); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5mm 5mm;
+  font-size: 8pt;
+}
+.legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+.callouts { display: flex; flex-direction: column; gap: 2mm; }
+.callout {
+  display: grid;
+  grid-template-columns: 28mm 22mm 1fr;
+  gap: 2mm;
+  align-items: center;
+  font-size: 8.5pt;
+}
+.callout .t { font-weight: 700; color: var(--hd); }
+.callout .n { color: var(--dm); font-size: 8pt; }
+
+/* 막대 차트 — 수직 정렬 (기울어짐 방지: bar-wrap + absolute height) */
+.bars {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 42mm;
+  padding: 0 1mm 0;
+  border-bottom: 1px solid var(--ln);
+}
+.bars .col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.bars .col .bar-wrap {
+  flex: 1 1 auto;
+  width: 100%;
+  position: relative;
+  min-height: 0;
+}
+.bars .col .bar {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 55%;
+  max-width: 12px;
+  background: #3c96aa;
+  border-radius: 2px 2px 0 0;
+  min-height: 1px;
+}
+.bars .col .bar.hi { background: var(--ins); }
+.bars .col .bar.money { background: #3474a8; }
+.bars .col .lbl {
+  flex: 0 0 auto;
+  font-size: 6.5pt;
+  color: var(--dm);
+  margin-top: 2px;
+  white-space: nowrap;
+  line-height: 1;
+  height: 10px;
+}
+.bars .col .v {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 1px);
+  font-size: 5.5pt;
+  color: var(--dm);
+  white-space: nowrap;
+}
+
+/* 라인+막대 콤보 (SVG 래퍼) */
+.chart-wrap {
+  width: 100%;
+  height: 48mm;
+}
+.chart-wrap svg { width: 100%; height: 100%; display: block; }
+
+.status-strip {
+  display: flex;
+  height: 12px;
+  margin-top: 2mm;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.status-strip i { display: block; height: 100%; }
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8pt;
+}
+table.data th {
+  text-align: left;
+  color: var(--dm);
+  font-weight: 700;
+  font-size: 7.5pt;
+  padding: 0 2px 3px;
+  border-bottom: 1px solid var(--ln);
+}
+table.data td {
+  padding: 3.5px 2px;
+  border-bottom: 1px solid #f0f3f7;
+  vertical-align: middle;
+}
+table.data tr.total td {
+  font-weight: 700;
+  border-top: 1px solid var(--ln);
+  border-bottom: none;
+  padding-top: 5px;
+  color: var(--hd);
+}
+table.data td.money { color: var(--money); font-weight: 700; }
+table.data .c-ok { color: var(--ok); font-weight: 700; }
+table.data .c-low { color: var(--low); font-weight: 700; }
+table.data .c-ins { color: var(--ins); font-weight: 700; }
+table.data .c-chk { color: var(--chk); font-weight: 700; }
+
+.guide-list { font-size: 8.5pt; }
+.guide-list dt {
+  float: left;
+  width: 36mm;
+  font-weight: 700;
+  color: var(--hd);
+  clear: left;
+}
+.guide-list dd {
+  margin-left: 38mm;
+  margin-bottom: 2.2mm;
+  color: var(--tx);
+}
+
+/* 캘린더 */
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2mm;
+}
+.cal .wd {
+  text-align: center;
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: var(--dm);
+  padding-bottom: 1mm;
+}
+.cal .day {
+  border: 1px solid var(--ln);
+  border-radius: 4px;
+  padding: 2mm 1.5mm;
+  min-height: 16mm;
+}
+.cal .day .n { font-size: 8.5pt; font-weight: 700; color: var(--hd); }
+.cal .day .ts { font-size: 6.5pt; color: var(--dm); margin-top: 1.5mm; }
+.cal .day.empty { border: none; }
+
+/* 카드 그리드 */
+.cards {
+  display: grid;
+  gap: 2.5mm;
+}
+.cards.c3 { grid-template-columns: repeat(3, 1fr); }
+.cards.c6 { grid-template-columns: repeat(6, 1fr); }
+.card {
+  border: 1px solid var(--ln);
+  border-radius: 5px;
+  padding: 2.5mm 3mm;
+  position: relative;
+  overflow: hidden;
+  background: #fafcfe;
+}
+.card .topbar {
+  position: absolute;
+  left: 0; top: 0; right: 0;
+  height: 3px;
+}
+.card .side {
+  position: absolute;
+  left: 0; top: 2mm; bottom: 2mm;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+.card .name { font-size: 9pt; font-weight: 700; color: var(--hd); }
+.card .meta { font-size: 8pt; color: var(--tx); margin-top: 1mm; }
+.card .hint { font-size: 7pt; color: var(--dm); margin-top: 1mm; }
+.card .hint.warn { color: var(--ins); }
+
+.env .kpis { grid-template-columns: repeat(4, 1fr); }
+
+@media print {
+  body { background: #fff; }
+  .toolbar { display: none !important; }
+  .pages { padding: 0; gap: 0; }
+  .page {
+    box-shadow: none;
+    margin: 0;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+</style>
+</head>
+<body>
+  <nav class="toolbar">
+    <strong>[덕우전자]태양광발전설비 일간 리포트</strong>
+    <span class="sep">|</span>
+    <a href="index.html">목록</a>
+    <a href="daily.html">일간</a>
+    <a href="monthly.html">월간</a>
+    <a href="yearly.html">연간</a>
+    <button type="button" onclick="window.print()">인쇄 / PDF 저장</button>
+    <span class="hint">A4 세로 · 여백 기본 · 배경 그래픽 켜기</span>
+  </nav>
+  <div class="pages">
+
+    <article class="page">
+      <header class="page-head">
+        <h1>[덕우전자]태양광발전설비 일간 리포트</h1>
+        <div class="sub">2026-09-15 (화) · 발전용량 1,850 kW · 인버터 6대 · 발행 2026-09-16</div>
+      </header>
+      <section class="block"><h2>1. 발전 현황</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="lab">발전량 (전력량계)</div><div class="val">12,480<span class="unit">kWh</span></div></div>
+          <div class="kpi"><div class="lab">인버터 합계</div><div class="val">12,538<span class="unit">kWh</span></div></div>
+          <div class="kpi"><div class="lab">최대 발전전력</div><div class="val">1,364<span class="unit">kW</span></div></div>
+          <div class="kpi"><div class="lab">가동 인버터</div><div class="val ok">6 / 6<span class="unit">대</span></div></div>
+        </div>
+      </section>
+      <section class="block"><h2>2. 산정 수익</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="lab">총 산정 수익</div><div class="val money">2,976,480<span class="unit">원</span></div></div>
+          <div class="kpi"><div class="lab">전력 판매 (SMP)</div><div class="val">1,628,640<span class="unit">원</span></div></div>
+          <div class="kpi"><div class="lab">공급인증서 (REC)</div><div class="val">1,347,840<span class="unit">원</span></div></div>
+          <div class="kpi"><div class="lab">평균 정산 단가</div><div class="val">238.5<span class="unit">원/kWh</span></div></div>
+        </div>
+      </section>
+      <section class="block"><h2>3. 발전 성능</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="lab">발전 성능</div><div class="val ok">72.4<span class="unit">%</span></div></div>
+          <div class="kpi"><div class="lab">더위 영향 제외 성능</div><div class="val teal">78.1<span class="unit">%</span></div></div>
+          <div class="kpi"><div class="lab">성능 계산 시간</div><div class="val">10시간 15분</div></div>
+          <div class="kpi"><div class="lab">오늘 상태</div><div style="margin-top:4px"><span class="badge ok">정상</span></div></div>
+        </div>
+      </section>
+      <section class="block"><h2>4. 시간대별 성능 상태</h2>
+        <div class="status-bar">
+          <span class="ok" style="width:40%"></span><span class="low" style="width:15%"></span>
+          <span class="ins" style="width:8%"></span><span class="chk" style="width:5%"></span>
+          <span class="na" style="width:32%"></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--ok)"></i>정상 40%</span>
+          <span><i style="background:var(--low)"></i>낮음 15%</span>
+          <span><i style="background:var(--ins)"></i>점검 권장 8%</span>
+          <span><i style="background:var(--chk)"></i>확인 중 5%</span>
+          <span><i style="background:var(--na)"></i>계산 안 함 32%</span>
+        </div>
+      </section>
+      <section class="block"><h2>5. 주목할 시간대</h2>
+        <div class="callouts">
+          <div class="callout"><span class="t">11:15 – 12:00</span><span class="badge ins">점검 권장</span><span>발전 성능 58.2 % · 햇빛 742 W/m²</span></div>
+          <div class="callout"><span class="t">14:30 – 14:45</span><span class="badge chk">확인 중</span><span>계측값 확인 중</span></div>
+        </div>
+      </section>
+      <section class="block"><h2>6. 시간대별 발전량</h2>
+        <div class="bars" style="height:38mm"><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl">00</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl">03</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:2%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:18%"></div></div><div class="lbl">06</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:45%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:74%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:91%"></div></div><div class="lbl">09</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:100%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:97%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar hi" style="height:77%"></div></div><div class="lbl">12</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:94%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:79%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:58%"></div></div><div class="lbl">15</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:30%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:6%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl">18</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl">21</div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div><div class="col"><div class="bar-wrap"><div class="bar" style="height:0%"></div></div><div class="lbl"></div></div></div>
+      </section>
+      <section class="block"><h2>7. 발전 환경</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="lab">하루 받은 햇빛 총량</div><div class="val">4.62 kWh/m²</div></div>
+          <div class="kpi"><div class="lab">평균 햇빛 세기</div><div class="val">412 W/m²</div></div>
+          <div class="kpi"><div class="lab">평균 모듈 온도</div><div class="val">38.2 ℃</div></div>
+          <div class="kpi"><div class="lab">평균 외기 온도</div><div class="val">27.1 ℃</div></div>
+        </div>
+      </section>
+      <footer class="page-foot"><span>1 / 3</span><span>CLOUD EMS</span></footer>
+    </article>
+
+    <article class="page">
+      <header class="page-head">
+        <h1>[덕우전자]태양광발전설비 일간 리포트 · 성능 상세</h1>
+        <div class="sub">2026-09-15 (화) · 15분 단위 기록</div>
+      </header>
+      <section class="block"><h2>8. 15분 단위 성능 추이</h2>
+        <div class="chart-wrap" style="height:55mm">
+          <svg viewBox="0 0 900 220" preserveAspectRatio="none" aria-label="15분 성능 추이">
+            <rect x="50" y="10" width="830" height="160" fill="#fcfdff" stroke="#dadfe8"/>
+            <g stroke="#edf0f5" stroke-width="1">
+              <line x1="50" y1="50" x2="880" y2="50"/><line x1="50" y1="90" x2="880" y2="90"/>
+              <line x1="50" y1="130" x2="880" y2="130"/><line x1="50" y1="170" x2="880" y2="170"/>
+            </g>
+            <g fill="#78808c" font-size="11" font-family="Malgun Gothic,sans-serif">
+              <text x="18" y="54">100</text><text x="26" y="94">85</text>
+              <text x="26" y="134">70</text><text x="26" y="174">55</text>
+              <text x="50" y="198">06:00</text><text x="250" y="198">09:00</text>
+              <text x="450" y="198">12:00</text><text x="650" y="198">15:00</text>
+              <text x="830" y="198">18:00</text>
+            </g>
+            <g fill="#e4e8ee">
+              <rect x="70" y="140" width="12" height="30"/><rect x="100" y="120" width="12" height="50"/>
+              <rect x="130" y="100" width="12" height="70"/><rect x="160" y="85" width="12" height="85"/>
+              <rect x="190" y="70" width="12" height="100"/><rect x="220" y="55" width="12" height="115"/>
+              <rect x="250" y="45" width="12" height="125"/><rect x="280" y="38" width="12" height="132"/>
+              <rect x="310" y="35" width="12" height="135"/><rect x="340" y="32" width="12" height="138"/>
+              <rect x="370" y="30" width="12" height="140"/><rect x="400" y="32" width="12" height="138"/>
+              <rect x="430" y="38" width="12" height="132"/><rect x="460" y="50" width="12" height="120"/>
+              <rect x="490" y="45" width="12" height="125"/><rect x="520" y="42" width="12" height="128"/>
+              <rect x="550" y="48" width="12" height="122"/><rect x="580" y="60" width="12" height="110"/>
+              <rect x="610" y="80" width="12" height="90"/><rect x="640" y="100" width="12" height="70"/>
+              <rect x="670" y="120" width="12" height="50"/><rect x="700" y="140" width="12" height="30"/>
+            </g>
+            <polyline fill="none" stroke="#2e7d32" stroke-width="2.5"
+              points="80,95 120,88 160,82 200,78 240,75 280,72 320,70 360,95 400,110 440,108 480,85 520,78 560,76 600,74 640,78 680,88 720,100 760,120"/>
+            <polyline fill="none" stroke="#007a8c" stroke-width="2.5"
+              points="80,82 120,76 160,70 200,66 240,63 280,60 320,58 360,82 400,96 440,94 480,72 520,66 560,64 600,62 640,66 680,76 720,88 760,108"/>
+          </svg>
+        </div>
+        <div class="status-strip">
+          <i style="width:12.5%;background:var(--na)"></i><i style="width:29%;background:var(--ok)"></i>
+          <i style="width:4%;background:var(--low)"></i><i style="width:10%;background:var(--ins)"></i>
+          <i style="width:25%;background:var(--ok)"></i><i style="width:2%;background:var(--chk)"></i>
+          <i style="width:17.5%;background:var(--na)"></i>
+        </div>
+        <div class="legend" style="margin-top:2.5mm">
+          <span><i style="background:var(--ok)"></i>발전 성능</span>
+          <span><i style="background:var(--teal)"></i>더위 영향 제외 성능</span>
+          <span><i style="background:#e4e8ee"></i>햇빛의 세기</span>
+        </div>
+        <div class="legend" style="margin-top:1.5mm">
+          <span><i style="background:var(--ok)"></i>정상</span>
+          <span><i style="background:var(--low)"></i>낮음</span>
+          <span><i style="background:var(--ins)"></i>점검 권장</span>
+          <span><i style="background:var(--chk)"></i>확인 중</span>
+          <span><i style="background:var(--na)"></i>계산 안 함</span>
+        </div>
+      </section>
+      <section class="block"><h2>9. 인버터별 발전량 · 변환효율</h2>
+        <table class="data">
+          <thead><tr><th>인버터</th><th>발전량</th><th>변환효율</th><th>오늘 상태</th><th>발생 시각</th><th>이상 시간</th><th>안내</th></tr></thead>
+          <tbody>
+            <tr><td><b>인버터 1</b></td><td>2,118 kWh</td><td>97.6 %</td><td class="c-ok">정상</td><td>—</td><td>—</td><td></td></tr>
+            <tr><td><b>인버터 2</b></td><td>2,094 kWh</td><td>96.2 %</td><td class="c-ok">정상</td><td>—</td><td>—</td><td></td></tr>
+            <tr><td><b>인버터 3</b></td><td class="c-ins">1,862 kWh</td><td class="c-ins">89.1 %</td><td class="c-low">낮음</td><td>13:15</td><td>1시간 45분</td><td>변환효율이 낮아요</td></tr>
+            <tr><td><b>인버터 4</b></td><td>2,102 kWh</td><td>95.4 %</td><td class="c-ok">정상</td><td>—</td><td>—</td><td></td></tr>
+            <tr><td><b>인버터 5</b></td><td>2,246 kWh</td><td>94.8 %</td><td class="c-chk">확인 중</td><td>10:30</td><td>15분</td><td>계측값 확인 중이에요</td></tr>
+            <tr><td><b>인버터 6</b></td><td>2,116 kWh</td><td>96.9 %</td><td class="c-ok">정상</td><td>—</td><td>—</td><td></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="block"><h2>10. 확인이 필요한 채널</h2>
+        <table class="data">
+          <thead><tr><th>대상</th><th>상태</th><th>지속 시간</th><th>주요 시간대</th><th>안내</th></tr></thead>
+          <tbody>
+            <tr><td><b>인버터 2 · 채널 4</b></td><td class="c-ins">점검 권장</td><td>3시간</td><td>10:45 – 14:00</td><td>전류가 거의 없어요. 배선·퓨즈 접속을 확인해 보세요.</td></tr>
+            <tr><td><b>인버터 3 · 채널 6</b></td><td class="c-low">낮음</td><td>1시간 45분</td><td>11:30 – 13:15</td><td>같은 인버터의 다른 채널보다 출력이 낮아요.</td></tr>
+            <tr><td><b>인버터 5 · 채널 2</b></td><td class="c-low">낮음</td><td>45분</td><td>09:15 – 10:00</td><td>일시적으로 낮았어요. 경과를 지켜봐 주세요.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <footer class="page-foot"><span>2 / 3</span><span>CLOUD EMS</span></footer>
+    </article>
+
+    <article class="page">
+      <header class="page-head">
+        <h1>[덕우전자]태양광발전설비 일간 리포트 · 데이터</h1>
+        <div class="sub">2026-09-15 (화)</div>
+      </header>
+      <section class="block"><h2>11. 최근 7일 발전 추이</h2>
+        <div class="bars" style="height:40mm"><div class="col"><div class="bar-wrap"><div class="v">8,921</div><div class="bar" style="height:71%"></div></div><div class="lbl">09.09</div></div><div class="col"><div class="bar-wrap"><div class="v">3,742</div><div class="bar" style="height:30%"></div></div><div class="lbl">09.10</div></div><div class="col"><div class="bar-wrap"><div class="v">10,680</div><div class="bar" style="height:86%"></div></div><div class="lbl">09.11</div></div><div class="col"><div class="bar-wrap"><div class="v">4,120</div><div class="bar" style="height:33%"></div></div><div class="lbl">09.12</div></div><div class="col"><div class="bar-wrap"><div class="v">3,640</div><div class="bar" style="height:29%"></div></div><div class="lbl">09.13</div></div><div class="col"><div class="bar-wrap"><div class="v">11,210</div><div class="bar" style="height:90%"></div></div><div class="lbl">09.14</div></div><div class="col"><div class="bar-wrap"><div class="v">12,480</div><div class="bar" style="height:100%"></div></div><div class="lbl">09.15</div></div></div>
+      </section>
+      <section class="block"><h2>12. 일자별 데이터</h2>
+        <table class="data">
+          <thead><tr><th>일자</th><th>발전량 (kWh)</th><th>인버터 (kWh)</th><th>차이 (%)</th><th>발전 성능 (%)</th><th>더위 제외 (%)</th><th>성능 계산 시간</th><th>산정 수익 (원)</th></tr></thead>
+          <tbody>
+            <tr><td>2026.09.09</td><td>8,921</td><td>8,960</td><td>0.44</td><td>70.8</td><td>76.2</td><td>9시간 30분</td><td>2,127,600</td></tr>
+            <tr><td>2026.09.10</td><td>3,742</td><td>3,758</td><td>0.43</td><td>61.2</td><td>67.0</td><td>5시간 30분</td><td>892,500</td></tr>
+            <tr><td>2026.09.11</td><td>10,680</td><td>10,712</td><td>0.30</td><td>74.1</td><td>79.6</td><td>11시간</td><td>2,547,200</td></tr>
+            <tr><td>2026.09.12</td><td>4,120</td><td>4,142</td><td>0.53</td><td>62.9</td><td>68.4</td><td>6시간</td><td>982,600</td></tr>
+            <tr><td>2026.09.13</td><td>3,640</td><td>3,655</td><td>0.41</td><td>60.4</td><td>66.1</td><td>5시간 15분</td><td>868,100</td></tr>
+            <tr><td>2026.09.14</td><td>11,210</td><td>11,254</td><td>0.39</td><td>73.6</td><td>79.0</td><td>10시간 45분</td><td>2,674,120</td></tr>
+            <tr><td><b>2026.09.15</b></td><td>12,480</td><td>12,538</td><td>0.46</td><td>72.4</td><td>78.1</td><td>10시간 15분</td><td>2,976,480</td></tr>
+            <tr class="total"><td>합계</td><td>54,793</td><td>55,019</td><td></td><td></td><td></td><td></td><td class="money">13,068,600</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="block"><h2>13. 지표 안내</h2>
+        <dl class="guide-list">
+          <dt>발전 성능</dt><dd>받은 햇빛 대비 전기를 얼마나 잘 만들었는지. 정상 범위 70 ~ 100 %.</dd>
+          <dt>더위 영향 제외 성능</dt><dd>더위 손해를 뺀 설비 본래 성능.</dd>
+          <dt>변환효율</dt><dd>직류→교류 변환 손실. 정상 범위 95 ~ 100 %.</dd>
+          <dt>성능 계산 시간</dt><dd>햇빛이 충분해 성능을 계산한 시간.</dd>
+          <dt>확인 중</dt><dd>계측값 확인 구간 · 평균에서 제외.</dd>
+        </dl>
+      </section>
+      <section class="block"><h2>14. 리포트 정보</h2>
+        <p class="note strong">발행 2026-09-16 06:10 · 데이터 기준 2026-09-15 24:00</p>
+      </section>
+      <footer class="page-foot"><span>3 / 3</span><span>CLOUD EMS</span></footer>
+    </article>
+
+  </div>
+</body>
+</html>
